@@ -1,4 +1,4 @@
-import utils from '../utils'
+// import utils from '../utils'
 
 /* describe('Historic data page', function () {
   before(utils.beforeWithLogin)

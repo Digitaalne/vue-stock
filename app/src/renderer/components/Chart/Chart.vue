@@ -1,11 +1,11 @@
 <template>
   <div id="chart">
-    <button v-on:click="changeModalVisibility">BUY OR SELL</button>
-    <br />
+    <md-button v-on:click="changeModalVisibility">BUY OR SELL</md-button>
     <md-button @click="toggleFav()">
             <span v-if="isFavourite"><md-icon>favorite</md-icon></span>
             <span v-else><md-icon>favorite_border</md-icon></span>
-          </md-button>
+    </md-button>
+    <md-button v-on:click="closeChart"><md-icon>clear</md-icon></md-button>      
     <br/>
     <highcharts class="stock" :constructor-type="'stockChart'" :options="stockOptions"></highcharts>
     <md-dialog :md-active.sync="modalVisible" @close="changeModalVisibility">
@@ -228,6 +228,9 @@ export default {
     isFav () {
       this.isFavourite = Boolean(favouriteService.isFav(this.name))
       return this.isFav
+    },
+    closeChart () {
+      this.$emit('closeChart', this.name)
     }
   }
 }
