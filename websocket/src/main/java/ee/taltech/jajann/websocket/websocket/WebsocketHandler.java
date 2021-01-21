@@ -61,6 +61,10 @@ public class WebsocketHandler extends TextWebSocketHandler implements Applicatio
             for (int i = 1; i < stocks.length; i++) {
                 sessionManager.addSession(stocks[i], session);
             }
+        } else if (stocks.length > 1 && stocks[0].equals("u")) {
+            for (int i = 1; i < stocks.length; i++) {
+                sessionManager.removeSessionFromStockCode(stocks[i], session);
+            }
         } else {
             throw new StockError("INVALID_PAYLOAD");
         }

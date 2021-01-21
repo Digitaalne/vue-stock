@@ -33,6 +33,18 @@ public class SessionManager {
     }
 
     /**
+     * Remove session from certain stock code.
+     *
+     * @param stockCode        stock code/symbol/ticker
+     * @param webSocketSession new websocket session.
+     */
+    public void removeSessionFromStockCode(String stockCode, WebSocketSession webSocketSession) {
+        if (sessions.containsKey(stockCode)) {
+            sessions.get(stockCode).remove(webSocketSession);
+        }
+    }
+
+    /**
      * Remove session from existing sessions.
      *
      * @param webSocketSession Session to be removed.

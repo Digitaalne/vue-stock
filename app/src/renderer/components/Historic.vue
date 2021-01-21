@@ -21,6 +21,7 @@
       <search v-on:stockSearch="searchStockInfo($event)"></search>
     </div>
     <chart
+      v-on:closeChart="deleteChart($event)"
       v-for="stk in stockList"
       :key="stk.t"
       v-bind:incData="stk"
@@ -91,6 +92,9 @@ export default {
         return false
       }
       return true
+    },
+    deleteChart (stockCode) {
+      this.stockList = this.stockList.filter(function (stock) { return stock.name !== stockCode })
     }
   }
 }

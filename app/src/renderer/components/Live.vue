@@ -4,7 +4,7 @@
       <search v-on:stockSearch="findStock($event)"></search>
       <br />
       <div>
-        <chart v-for="(stk, name) in message" :key="stk.t" v-bind:incData="stk" v-bind:name="name" v-bind:rangeSelect="rangeSelect"></chart>
+        <chart v-on:closeChart="deleteChart($event)" v-for="(stk, name) in message" :key="stk.t" v-bind:incData="stk" v-bind:name="name" v-bind:rangeSelect="rangeSelect"></chart>
       </div>
     </div>
   </div>
@@ -65,6 +65,10 @@ export default {
         })
         this.$socket.send('s-' + stockCode.trim())
       }
+    },
+    deleteChart (stockCode) {
+      // this.$socket.send('u-' + stockCode.trim())
+      store.dispatch(storeName + '/unsubscribe', stockCode)
     }
   },
   computed: {

@@ -18,7 +18,6 @@ export default {
   },
   methods: {
     redirect () {
-      console.log('hi')
       if (this.loggedIn) {
         this.$router.push('/live')
       }

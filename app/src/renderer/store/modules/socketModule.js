@@ -21,15 +21,11 @@ const mutations = {
   SOCKET_ONERROR (state, event) {
     console.error(state, event)
   },
-  // default handler called for all methods
   SOCKET_ONMESSAGE (state, message) {
     var toObj = JSON.parse(message.data)
     var keys = Object.keys(toObj)
     for (var i = 0; i < keys.length; i++) {
-      // console.log( message.data[ keys[ i ] ] )
       if (keys[i] in state.message) {
-        // state.message[keys[i]].stock_data_list = [...state.message[keys[i]].stock_data_list, ...toObj[keys[i]].stock_data_list]
-        // state.message[keys[i]].stock_volume_list = [...state.message[keys[i]].stock_volume_list, ...toObj[keys[i]].stock_volume_list]
         Vue.set(state.message, keys[i], {
           stock_data_list: [
             ...state.message[keys[i]].stock_data_list,
@@ -41,21 +37,21 @@ const mutations = {
           ]
         })
       } else {
-        // state.message[keys[i]] = toObj[keys[i]]
         Vue.set(state.message, keys[i], toObj[keys[i]])
       }
     }
   },
-  // mutations for reconnect methods
   SOCKET_RECONNECT (state, count) {
     console.info(state, count)
   },
   SOCKET_RECONNECT_ERROR (state) {
     state.reconnectError = true
   },
-  // reset state
   RESET_STATE (state) {
     Object.assign(state, getDefaultState())
+  },
+  UNSUBSCRIBE (state, key) {
+    Vue.delete(state.message, key)
   }
 }
 
@@ -80,6 +76,9 @@ const actions = {
   },
   resetState ({ commit }) {
     commit('RESET_STATE')
+  },
+  unsubscribe ({ commit }, event) {
+    commit('UNSUBSCRIBE', event)
   }
 }
 
