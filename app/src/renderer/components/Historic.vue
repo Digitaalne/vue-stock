@@ -94,7 +94,7 @@ export default {
       return true
     },
     deleteChart (stockCode) {
-      
+      this.stockList = this.stockList.filter(function (stock) { return stock.name !== stockCode })
     }
   }
 }

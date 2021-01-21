@@ -67,7 +67,8 @@ export default {
       }
     },
     deleteChart (stockCode) {
-      this.$socket.send('u-' + stockCode.trim())
+      // this.$socket.send('u-' + stockCode.trim())
+      store.dispatch(storeName + '/unsubscribe', stockCode)
     }
   },
   computed: {
