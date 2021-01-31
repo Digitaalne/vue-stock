@@ -18,7 +18,7 @@
           <md-speed-dial-target>
             <md-icon>favorite</md-icon>
           </md-speed-dial-target>
-          <md-speed-dial-content>
+          <md-speed-dial-content class="fav-selection">
             <md-button
               v-for="(fav, index) in favs"
               :key="index"
@@ -113,7 +113,14 @@ export default {
 
 <style lang="scss" scoped>
 #fav-but {
+  overflow: visible;
   margin-top: 15px;
 }
 .pd{padding-bottom: 20px;}
+
+.fav-selection{
+  position:absolute;
+  align-self:center;
+  margin-top:60px;
+}
 </style>
