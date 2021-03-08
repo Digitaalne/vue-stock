@@ -9,10 +9,14 @@
 
 <script>
 import Navigation from './components/Navigation.vue'
+import ib from './service/IbService'
 export default {
   name: 'loputoo',
   components: {
     Navigation
+  },
+  created () {
+    ib.yolo()
   }
 }
 </script>
