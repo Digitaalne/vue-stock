@@ -1,4 +1,4 @@
-import { IBApi, EventName, Contract } from '@stoqey/ib'
+import { IBApi, EventName, Contract, ErrorCode } from '@stoqey/ib'
 
 const ib = new IBApi({
   port: 4002
@@ -22,20 +22,10 @@ interface Position {
   account?: string;
 }
 
-let positionsCount = 0
-ib.on(EventName.error, (err : Error, code, reqId) => {
-  console.error(`${err.message} - code: ${code} - reqId: ${reqId}`)
-})
-  .on(EventName.position, (account, contract, pos, avgCost) => {
-    console.log(`${account}: ${pos} x ${contract.symbol} @ ${avgCost}`)
-    positionsCount++
-  })
-  .once(EventName.positionEnd, () => {
-    console.log(`Total: ${positionsCount} posistions.`)
-    ib.disconnect()
-  })
 ib.connect()
-console.log(ib)
+ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
+  console.error(error.message)
+})
 
 function mapToPosition (contract: Contract, pos: number, avgCost: number, account: string) : Position {
   return {
@@ -48,17 +38,44 @@ function mapToPosition (contract: Contract, pos: number, avgCost: number, accoun
   }
 }
 
-Object.freeze(ib)
+// Object.freeze(ib)
 export default {
-  getPosition () {
-    let posList : Position[]
-    ib.on(EventName.position, (account: string, contract: Contract, position: number, avgCost: number) => {
-      posList.push(mapToPosition(contract, position, avgCost, account))
-    })
-      .once(EventName.positionEnd, () => {
-        ib.cancelPositions()
-        return posList
+  async getPosition () {
+    var prom = new Promise(function(resolve, reject) {
+      let posList : Position[] = new Array()
+      ib.on(EventName.position, (account: string, contract: Contract, position: number, avgCost: number) => {
+        posList.push(mapToPosition(contract, position, avgCost, account))
       })
+        .once(EventName.positionEnd, () => {
+          ib.cancelPositions()
+          resolve(posList)
+        })
+    })
     ib.reqPositions()
+    return prom
+  },
+  getRealTimeBars (contract: Contract) {
+    ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
+
+    })
+    ib.reqRealTimeBars(0, contract, 1, 'TRADES', false)
+  },
+  getHistoricalData (contract: Contract, endDateTime: string, duration: string, timeframe: string) {
+    let wafa = new Array()
+    let pafa = new Array()
+    ib.on(EventName.nextValidId, (id: number) => {
+      ib.reqHistoricalData(id, contract, endDateTime, duration, timeframe, 'TRADES', 0, 2, false)
+    })
+    ib.on(EventName.historicalData, (reqId: number, time: string, open: number, high: number, low: number, close: number, volume: number, count: number, WAP: number, hasGaps: boolean | undefined) => {
+     var ab = [time, open, high, low, close]
+     var cd = [time, volume]
+     wafa.push(ab)
+     pafa.push(cd)
+    })
+    ib.on(EventName.historicalDataEnd, (reqId: number, start: string, end: string) => {
+      ib.cancelHistoricalData(reqId);
+      return {stock_data_list: wafa, stock_volume_list: pafa}
+    })
+    ib.reqIds()
   }
 }
