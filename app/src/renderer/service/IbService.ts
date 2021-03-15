@@ -24,7 +24,7 @@ interface Position {
 
 ib.connect()
 ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
-  console.error(error.message)
+  //console.error(error.message)
 })
 
 function mapToPosition (contract: Contract, pos: number, avgCost: number, account: string) : Position {
@@ -40,7 +40,7 @@ function mapToPosition (contract: Contract, pos: number, avgCost: number, accoun
 
 // Object.freeze(ib)
 export default {
-  async getPosition () {
+   async getPosition () {
     var prom = new Promise(function(resolve, reject) {
       let posList : Position[] = new Array()
       ib.on(EventName.position, (account: string, contract: Contract, position: number, avgCost: number) => {
@@ -52,7 +52,7 @@ export default {
         })
     })
     ib.reqPositions()
-    return prom
+    return prom 
   },
   getRealTimeBars (contract: Contract) {
     ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
@@ -72,10 +72,7 @@ export default {
      wafa.push(ab)
      pafa.push(cd)
     })
-    ib.on(EventName.historicalDataEnd, (reqId: number, start: string, end: string) => {
-      ib.cancelHistoricalData(reqId);
-      return {stock_data_list: wafa, stock_volume_list: pafa}
-    })
+  
     ib.reqIds()
   }
 }
