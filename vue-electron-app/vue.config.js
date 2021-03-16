@@ -1,4 +1,6 @@
-module.exports = {
+var path = require('path');
+
+const electron = {
     pages: {
       index: {
         entry: 'src/main.js',
@@ -11,3 +13,20 @@ module.exports = {
     }
   }
 }
+
+ const webConfig = {
+    target: 'web',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'backend.js',
+    },
+} 
+
+const tyhi = {pages: {
+  index: {
+    entry: 'src/main.js',
+    target: 'electron-renderer',
+  }
+}}
+
+module.exports = electron
