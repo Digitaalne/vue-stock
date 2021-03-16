@@ -34,9 +34,9 @@
 <script>
 import Vue from 'vue'
 import StockService from '../service/StockService.js'
-import chart from './Chart/Chart.vue'
+import chart from '../components/Chart/Chart.vue'
 import VCalendar from 'v-calendar'
-import search from './Chart/Search.vue'
+import search from '../components/Chart/Search.vue'
 
 Vue.use(VCalendar)
 
