@@ -52,7 +52,7 @@ export default {
   },
   methods: {
     async loadData () {
-      //this.positionList = ibService.getPosition()
+      this.positionList = await ibService.getPosition()
     }
   },
   created () {

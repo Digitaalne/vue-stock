@@ -22,7 +22,7 @@ interface Position {
   account?: string;
 }
 
-//ib.connect()
+ib.connect()
 ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
   //console.error(error.message)
 })
