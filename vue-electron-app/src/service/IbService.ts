@@ -1,4 +1,4 @@
-import { IBApi, EventName, Contract, ErrorCode } from '@stoqey/ib'
+import { IBApi, EventName, Contract, ErrorCode, ContractDescription } from '@stoqey/ib'
 
 const ib = new IBApi({
   port: 4002
@@ -24,7 +24,7 @@ interface Position {
 
 ib.connect()
 ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
-  //console.error(error.message)
+  console.error(error.message)
 })
 
 function mapToPosition (contract: Contract, pos: number, avgCost: number, account: string) : Position {
@@ -72,7 +72,21 @@ export default {
      wafa.push(ab)
      pafa.push(cd)
     })
+    ib.on(EventName.historicalDataEnd, (regId: number, start: string, end:string) => {
+      ib.cancelHistoricalData(regId);
+      return {wafa, pafa}
+    })
   
     ib.reqIds()
+  },
+  searchStockSymbol(pattern: string){
+    ib.on(EventName.nextValidId, (id: number) => {
+      ib.reqMatchingSymbols(id, pattern)
+    })
+    ib.on(EventName.symbolSamples, (reqId: number, contractDescriptions: ContractDescription[]) =>{
+      console.log(contractDescriptions)
+      return contractDescriptions;
+    })
+    ib.reqIds();
   }
 }

@@ -37,6 +37,7 @@ import StockService from '../service/StockService.js'
 import chart from '../components/Chart/Chart.vue'
 import VCalendar from 'v-calendar'
 import search from '../components/Chart/Search.vue'
+import ibService from '../service/IbService.ts'
 
 Vue.use(VCalendar)
 
@@ -95,7 +96,13 @@ export default {
     },
     deleteChart (stockCode) {
       this.stockList = this.stockList.filter(function (stock) { return stock.name !== stockCode })
+    },
+    testMethod() {
+      console.log('yee', ibService.searchStockSymbol("AAPL"));
     }
+  },
+  mounted() {
+    this.testMethod();
   }
 }
 </script>
