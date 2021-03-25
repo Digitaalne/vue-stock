@@ -1,4 +1,5 @@
 import AxiosService from './AxiosService'
+import ibService from './IbService.ts'
 
 const ORDER_API_URL = 'paper/order'
 const POSITION_API_URL = 'paper/position'
@@ -15,7 +16,8 @@ export default {
       extended_hours: data.extended_hours})
   },
   getPositionList () {
-    return AxiosService.get(POSITION_API_URL)
+    //return AxiosService.get(POSITION_API_URL)
+    return ibService.getPosition()
   },
   getActivitesList () {
     return AxiosService.get(ACTIVITY_API_URL)

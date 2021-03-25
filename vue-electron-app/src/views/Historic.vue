@@ -98,7 +98,8 @@ export default {
       this.stockList = this.stockList.filter(function (stock) { return stock.name !== stockCode })
     },
     testMethod() {
-      console.log('yee', ibService.searchStockSymbol("AAPL"));
+      console.log('yee', ibService.searchStockSymbol("GME"));
+      ibService.getHistoricalData(null, "20210319 23:59:59 GMT", "3 D", "1 hour")
     }
   },
   mounted() {

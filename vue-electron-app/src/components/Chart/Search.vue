@@ -66,21 +66,7 @@ export default {
   },
   methods: {
     async searchStockSymbol () {
-      this.possibleSymbols = []
-      if (this.symbol.length >= 1) {
-        var resp = await stockService.searchStockSymbol(this.symbol)
-        if (this.symbol.length === 0) return
-        if (resp.securities && Array.isArray(resp.securities.security)) {
-          this.possibleSymbols = resp.securities.security.slice(0, 10)
-        } else if (
-          resp.securities &&
-          !Array.isArray(resp.securities.security)
-        ) {
-          this.possibleSymbols = [resp.securities.security]
-        }
-      } else {
-        this.possibleSymbols = []
-      }
+      this.possibleSymbols = await stockService.searchStockSymbol(this.symbol)
     },
 
     finishAutocomplete (stock) {

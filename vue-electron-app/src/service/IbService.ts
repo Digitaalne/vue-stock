@@ -1,4 +1,4 @@
-import { IBApi, EventName, Contract, ErrorCode, ContractDescription } from '@stoqey/ib'
+import { IBApi, EventName, Contract, ErrorCode, ContractDescription, SecType } from '@stoqey/ib'
 
 const ib = new IBApi({
   port: 4002
@@ -61,32 +61,46 @@ export default {
     ib.reqRealTimeBars(0, contract, 1, 'TRADES', false)
   },
   getHistoricalData (contract: Contract, endDateTime: string, duration: string, timeframe: string) {
+    let cont:Contract = new Object();
+    cont.conId=36285627;
+    cont.currency = "USD";
+    cont.secType = SecType.STK;
+    cont.symbol = "GME";
+    cont.exchange = "NYSE"
+
     let wafa = new Array()
     let pafa = new Array()
     ib.on(EventName.nextValidId, (id: number) => {
-      ib.reqHistoricalData(id, contract, endDateTime, duration, timeframe, 'TRADES', 0, 2, false)
+      ib.reqHistoricalData(id, cont, endDateTime, duration, timeframe, 'TRADES', 0, 2, false)
     })
     ib.on(EventName.historicalData, (reqId: number, time: string, open: number, high: number, low: number, close: number, volume: number, count: number, WAP: number, hasGaps: boolean | undefined) => {
      var ab = [time, open, high, low, close]
      var cd = [time, volume]
+     console.log(ab)
+     console.log(cd)
      wafa.push(ab)
      pafa.push(cd)
     })
     ib.on(EventName.historicalDataEnd, (regId: number, start: string, end:string) => {
       ib.cancelHistoricalData(regId);
+      console.log(wafa)
+      console.log(pafa)
       return {wafa, pafa}
     })
   
     ib.reqIds()
   },
-  searchStockSymbol(pattern: string){
+  searchStockSymbol(pattern: string) {
+    var prom = new Promise(function(resolve, reject) {
     ib.on(EventName.nextValidId, (id: number) => {
       ib.reqMatchingSymbols(id, pattern)
     })
-    ib.on(EventName.symbolSamples, (reqId: number, contractDescriptions: ContractDescription[]) =>{
+    ib.on(EventName.symbolSamples, (reqId: number, contractDescriptions: ContractDescription[]) => {
       console.log(contractDescriptions)
-      return contractDescriptions;
+      resolve(contractDescriptions);
+    })
     })
     ib.reqIds();
+    return prom;
   }
 }
