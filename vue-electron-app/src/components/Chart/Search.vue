@@ -8,7 +8,7 @@
             type="text"
             placeholder="Enter stock symbol"
             v-model="symbol"
-            v-on:input="searchStockSymbol"
+            v-debounce:300ms="searchStockSymbol"
           />
           <md-button class="md-primary" @click="startSearch">Search</md-button>
         </md-field>
@@ -32,7 +32,7 @@
       <span
         v-for="(searchAnswer, index) in possibleSymbols"
         :key="index"
-        @click="finishAutocomplete(searchAnswer.symbol)"
+        @click="finishAutocomplete(searchAnswer)"
       >
         <span>
           <span>{{searchAnswer.symbol}} - {{searchAnswer.description}}</span>
@@ -60,6 +60,7 @@ export default {
   data () {
     return {
       symbol: '',
+      selectedStock: Object,
       possibleSymbols: [],
       favs: null
     }
@@ -70,12 +71,13 @@ export default {
     },
 
     finishAutocomplete (stock) {
-      this.symbol = stock
+      this.symbol = stock.symbol
+      this.selectedStock = stock;
       this.possibleSymbols = []
     },
 
     startSearch () {
-      this.$emit('stockSearch', this.symbol)
+      this.$emit('stockSearch', this.selectedStock)
       this.symbol = ''
       this.possibleSymbols = []
     },

@@ -1,5 +1,7 @@
 import { IBApi, EventName, Contract, ErrorCode, ContractDescription, SecType } from '@stoqey/ib'
+import store from '../store/index'
 
+const storeName = 'socketModule'
 const ib = new IBApi({
   port: 4002
 })
@@ -24,7 +26,7 @@ interface Position {
 
 ib.connect()
 ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
-  console.error(error.message)
+  console.error("ERROR: " + error.message + " " + code)
 })
 
 function mapToPosition (contract: Contract, pos: number, avgCost: number, account: string) : Position {
@@ -55,10 +57,22 @@ export default {
     return prom 
   },
   getRealTimeBars (contract: Contract) {
-    ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
-
+    ib.reqMarketDataType(3);
+    console.log(contract)
+    ib.on(EventName.nextValidId, (id: number) => {
+      console.log("1ˇ1111111111111111111111")
+      ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
+      console.log("222222222222222222222222")
     })
-    ib.reqRealTimeBars(0, contract, 1, 'TRADES', false)
+    ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
+      var ab = [date, open, high, low, close]
+      var cd = [date, volume]
+      store.dispatch(storeName + '/socketOnmessage', {
+        data: JSON.stringify({[contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
+      })
+    })
+    ib.reqIds();
+    
   },
   getHistoricalData (contract: Contract, endDateTime: string, duration: string, timeframe: string) {
     let cont:Contract = new Object();
@@ -92,10 +106,10 @@ export default {
   },
   searchStockSymbol(pattern: string) {
     var prom = new Promise(function(resolve, reject) {
-    ib.on(EventName.nextValidId, (id: number) => {
+    ib.once(EventName.nextValidId, (id: number) => {
       ib.reqMatchingSymbols(id, pattern)
     })
-    ib.on(EventName.symbolSamples, (reqId: number, contractDescriptions: ContractDescription[]) => {
+    ib.once(EventName.symbolSamples, (reqId: number, contractDescriptions: ContractDescription[]) => {
       console.log(contractDescriptions)
       resolve(contractDescriptions);
     })

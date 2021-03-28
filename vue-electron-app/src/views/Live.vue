@@ -51,7 +51,7 @@ export default {
           type: 'warn'
         })
       } else {
-        var start = new Date()
+       /*  var start = new Date()
         start.setHours(0, 0, 0, 0)
         store.dispatch(storeName + '/socketOnmessage', {
           data: JSON.stringify(
@@ -63,7 +63,8 @@ export default {
             )
           )
         })
-        this.$socket.send('s-' + stockCode.trim())
+        this.$socket.send('s-' + stockCode.trim()) */
+        stockService.getStockInformation(stockCode);
       }
     },
     deleteChart (stockCode) {
