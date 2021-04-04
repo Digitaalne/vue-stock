@@ -75,6 +75,9 @@ export default {
   computed: {
     ...mapState(storeName, ['message'])
   },
+  mounted() {
+    stockService.testfunc();
+  },
   beforeCreate () {
     store.dispatch(storeName + '/resetState')
   }

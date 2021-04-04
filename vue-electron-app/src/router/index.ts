@@ -30,6 +30,11 @@ const routes: Array<RouteConfig> = [
     component: require('@/views/TradeHistory').default
   },
   {
+    path: '/service',
+    name: 'services',
+    component: require('@/views/ChooseService').default
+  },
+  {
     path: '*',
     redirect: '/'
   }

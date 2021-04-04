@@ -1,4 +1,4 @@
-import { IBApi, EventName, Contract, ErrorCode, ContractDescription, SecType } from '@stoqey/ib'
+import { IBApi, EventName, Contract, ErrorCode, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
 import store from '../store/index'
 
 const storeName = 'socketModule'
@@ -26,7 +26,7 @@ interface Position {
 
 ib.connect()
 ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
-  console.error("ERROR: " + error.message + " " + code)
+  console.error("ERROR: " + error.message + " " + code + " " + reqId)
 })
 
 function mapToPosition (contract: Contract, pos: number, avgCost: number, account: string) : Position {
@@ -57,12 +57,12 @@ export default {
     return prom 
   },
   getRealTimeBars (contract: Contract) {
-    ib.reqMarketDataType(3);
+    contract.exchange = contract.primaryExch
+    ib.reqMarketDataType(4);
     console.log(contract)
-    ib.on(EventName.nextValidId, (id: number) => {
-      console.log("1ˇ1111111111111111111111")
-      ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
-      console.log("222222222222222222222222")
+    ib.once(EventName.nextValidId, (id: number) => {
+      //ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
+      ib.reqMktData(id, contract, "", false, false);
     })
     ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
       var ab = [date, open, high, low, close]
@@ -70,6 +70,12 @@ export default {
       store.dispatch(storeName + '/socketOnmessage', {
         data: JSON.stringify({[contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
       })
+    })
+    ib.on(EventName.tickPrice, (fields: TickType, value: number, attribs: unknown) => {
+      console.log((TickType.DELAYED_LAST === fields) + " " + value + " " +contract.symbol + " " + attribs) 
+    })
+    ib.on(EventName.tickSize, (field: TickType, value: number) => {
+      console.log(field.toLocaleString() + " " + value)
     })
     ib.reqIds();
     
@@ -84,7 +90,7 @@ export default {
 
     let wafa = new Array()
     let pafa = new Array()
-    ib.on(EventName.nextValidId, (id: number) => {
+    ib.once(EventName.nextValidId, (id: number) => {
       ib.reqHistoricalData(id, cont, endDateTime, duration, timeframe, 'TRADES', 0, 2, false)
     })
     ib.on(EventName.historicalData, (reqId: number, time: string, open: number, high: number, low: number, close: number, volume: number, count: number, WAP: number, hasGaps: boolean | undefined) => {
@@ -110,11 +116,77 @@ export default {
       ib.reqMatchingSymbols(id, pattern)
     })
     ib.once(EventName.symbolSamples, (reqId: number, contractDescriptions: ContractDescription[]) => {
-      console.log(contractDescriptions)
-      resolve(contractDescriptions);
+      resolve(contractDescriptions); 
     })
+  
     })
     ib.reqIds();
+    return prom;
+  },
+  placeOrder(input: any, contract: Contract){
+    console.log("hi")
+    let cont:Contract = new Object();
+    cont.conId=36285627;
+    cont.currency = "USD";
+    cont.secType = SecType.STK;
+    cont.symbol = "GME";
+    cont.exchange = "NYSE"
+
+    var order: Order = new Object()
+
+    switch(input.type) {
+      case "market":
+        order.orderType = OrderType.MKT;
+        break;
+      case "limit":
+        order.orderType = OrderType.LMT;
+        break;
+      case "stop":
+        order.orderType = OrderType.STP;
+        break;
+      case "stop_limit":
+        order.orderType = OrderType.STP_LMT;
+        break;
+    }
+    switch(input.side) {
+      case "buy":
+        order.action = OrderAction.BUY;
+        break;
+      case "sell":
+        order.action = OrderAction.SELL;
+        break;
+    }
+
+    order.totalQuantity = input.qty;
+    order.orderType = OrderType.MKT;
+    order.lmtPrice = input.limit_price;
+    order.auxPrice = input.stop_price;
+    order.tif = input.time_in_force;
+    var account = localStorage.getItem("ACCOUNT")
+    if(account == null) {
+      //TODO:: Throw error
+        return;
+    }
+    order.account = account
+    ib.once(EventName.nextValidId, (id:number) => {
+      ib.placeOrder(id, cont, order)
+    })
+    ib.on(EventName.openOrder, (orderId: number, contract: Contract, order: Order, orderState: OrderState)  => {
+      console.log("status " + orderState.status)
+    })
+    ib.on(EventName.orderStatus, (orderId: number, apiClientId: number, apiOrderId: number, whyHeld: string, mktCapPrice: number) => {
+      console.log("oid " + orderId)
+    })
+  
+    ib.reqIds();
+  },
+  getAllAccounts(){
+    var prom =  new Promise(function(resolve, reject) {
+    ib.on(EventName.managedAccounts, (accountsList: string) => {
+        resolve(accountsList.split(","))
+      })
+    });
+    ib.reqManagedAccts();
     return prom;
   }
 }

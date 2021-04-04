@@ -16,7 +16,6 @@ export default {
     }) */
   },
   async getStockInformation (stock) {
-    console.log("yoo " + stock);
     ibService.getRealTimeBars(stock.contract)
   },
   async searchStockSymbol (symbol) {
@@ -49,5 +48,12 @@ export default {
     } else {
       this.possibleSymbols = []
     } */
+  },
+  async testfunc () {
+    var order = {}
+    order.side = "buy"
+    order.type = "market"
+    order.qty = 1
+    ibService.placeOrder(order, null)
   }
 }
