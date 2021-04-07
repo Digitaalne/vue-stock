@@ -1,9 +1,18 @@
-import { IBApi, EventName, Contract, ErrorCode, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
+import { IBApi, EventName, Contract, ErrorCode, ExecutionFilter, Execution, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
 import store from '../store/index'
+let portString = localStorage.getItem("PORT")
+let portNumber;
+if(portString == null && localStorage.getItem("SERVICE") === "IBKR") {
+ // throw error
+} else if (Number(portString) == NaN){
+  //throw error
+} else if(localStorage.getItem("SERVICE") === "IBKR") {
+  portNumber = parseInt(portString!)
+}
 
 const storeName = 'socketModule'
 const ib = new IBApi({
-  port: 4002
+  port: portNumber
 })
 
 interface Position {
@@ -22,6 +31,18 @@ interface Position {
   lastday_price?: number;
   change_today?: number;
   account?: string;
+}
+
+interface History {
+  symbol?: string;
+  activity_type?: string;
+  cum_qty?: number;
+  leaves_qty?: number;
+  price?: number;
+  qty?: number;
+  side?: string;
+  type?: string;
+  transaction_time?: Date
 }
 
 ib.connect()
@@ -71,11 +92,11 @@ export default {
         data: JSON.stringify({[contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
       })
     })
-    ib.on(EventName.tickPrice, (fields: TickType, value: number, attribs: unknown) => {
+    ib.on(EventName.tickPrice, (tickerId: number, fields: TickType, value: number, attribs: unknown) => {
       console.log((TickType.DELAYED_LAST === fields) + " " + value + " " +contract.symbol + " " + attribs) 
     })
-    ib.on(EventName.tickSize, (field: TickType, value: number) => {
-      console.log(field.toLocaleString() + " " + value)
+    ib.on(EventName.tickSize, (tickerId: number, field: TickType, value: number)=> {
+      console.log(field + " " + value)
     })
     ib.reqIds();
     
@@ -188,5 +209,27 @@ export default {
     });
     ib.reqManagedAccts();
     return prom;
+  },
+  getOrderHistory(){
+    var response: History[] = new Array()
+    var prom = new Promise(function(resolve, reject) {
+      ib.on(EventName.completedOrder, (contract: Contract, order: Order, orderState: OrderState) => {
+          var history:History = new Object()
+          history.symbol = contract.symbol;
+          history.side = order.action
+          history.qty = order.filledQuantity
+          history.price = order.lmtPrice
+          history.transaction_time = new Date(orderState.completedTime!)
+          response.push(history);
+          console.log(contract, order, orderState)
+      })
+      ib.once(EventName.completedOrdersEnd, () => {
+          resolve(response)
+      }) 
+    })
+      ib.reqCompletedOrders(false);
+      ib.reqAllOpenOrders();
+      ib.reqExecutions(0, new Object());
+      return prom;
   }
 }
