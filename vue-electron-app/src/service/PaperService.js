@@ -20,7 +20,8 @@ export default {
     return ibService.getPosition()
   },
   getActivitesList () {
-    return AxiosService.get(ACTIVITY_API_URL)
+    //return AxiosService.get(ACTIVITY_API_URL)
+    return ibService.getOrderHistory()
   }
 
 }
