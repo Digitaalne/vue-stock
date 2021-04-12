@@ -14,6 +14,18 @@ const storeName = 'socketModule'
 const ib = new IBApi({
   port: portNumber
 })
+interface Prices {
+  bidPrice: Array<Number>
+  askPrice: Array<Number>
+  volume: Array<Number>
+}
+
+interface xxx {
+  lastUpdate: Date
+  contract: Contract
+}
+var pricesDict = new Map<Number, Prices>()
+var tickers = new Map<Number, xxx>()
 
 interface Position {
   symbol?: string;
@@ -84,6 +96,14 @@ export default {
     ib.once(EventName.nextValidId, (id: number) => {
       //ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
       ib.reqMktData(id, contract, "", false, false);
+      var metadata: xxx = 
+      {lastUpdate : new Date(),
+      contract: contract}
+      tickers.set(id, metadata)
+      var price: Prices = {askPrice : [],
+        bidPrice: [],
+        volume: []}
+        pricesDict.set(id,price)
     })
     ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
       var ab = [date, open, high, low, close]
@@ -92,11 +112,19 @@ export default {
         data: JSON.stringify({[contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
       })
     })
-    ib.on(EventName.tickPrice, (tickerId: number, fields: TickType, value: number, attribs: unknown) => {
-      console.log((TickType.DELAYED_LAST === fields) + " " + value + " " +contract.symbol + " " + attribs) 
+    ib.on(EventName.tickPrice, (tickerId: number, field: TickType, value: number, attribs: unknown) => {
+      var tickList = pricesDict.get(tickerId)
+      if(TickType.DELAYED_ASK === field || TickType.ASK === field){
+        tickList?.askPrice.push(value)
+      } else if (TickType.BID === field || TickType.DELAYED_BID === field){
+        tickList?.bidPrice.push(value)
+      }
     })
     ib.on(EventName.tickSize, (tickerId: number, field: TickType, value: number)=> {
-      console.log(field + " " + value)
+      var tickList = pricesDict.get(tickerId)
+      if(TickType.VOLUME === field){
+        tickList?.volume.push(value)
+      }
     })
     ib.reqIds();
     
@@ -213,23 +241,24 @@ export default {
   getOrderHistory(){
     var response: History[] = new Array()
     var prom = new Promise(function(resolve, reject) {
-      ib.on(EventName.completedOrder, (contract: Contract, order: Order, orderState: OrderState) => {
-          var history:History = new Object()
-          history.symbol = contract.symbol;
-          history.side = order.action
-          history.qty = order.filledQuantity
-          history.price = order.lmtPrice
-          history.transaction_time = new Date(orderState.completedTime!)
-          response.push(history);
-          console.log(contract, order, orderState)
+      ib.once(EventName.nextValidId, (id:number) => {
+        ib.reqExecutions(id, new Object());
       })
-      ib.once(EventName.completedOrdersEnd, () => {
-          resolve(response)
-      }) 
+      ib.on(EventName.execDetails, (reqId: number, contract: Contract, execution: Execution) => {
+        var history:History = new Object()
+          history.symbol = contract.symbol;
+          history.side = execution.side
+          history.qty = execution.shares
+          history.cum_qty = execution.cumQty;
+          history.price = execution.price
+          history.transaction_time = new Date(execution.time!)
+          response.push(history);
+      })
+      ib.once(EventName.execDetailsEnd, () => {
+        resolve(response)
+      })
     })
-      ib.reqCompletedOrders(false);
-      ib.reqAllOpenOrders();
-      ib.reqExecutions(0, new Object());
+      ib.reqIds();
       return prom;
   }
 }
