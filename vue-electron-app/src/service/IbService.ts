@@ -1,7 +1,10 @@
 import { IBApi, EventName, Contract, ErrorCode, ExecutionFilter, Execution, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
 import store from '../store/index'
+
+const CANDLESTICK_SECONDS = 120;
 let portString = localStorage.getItem("PORT")
 let portNumber;
+
 if(portString == null && localStorage.getItem("SERVICE") === "IBKR") {
  // throw error
 } else if (Number(portString) == NaN){
@@ -15,17 +18,18 @@ const ib = new IBApi({
   port: portNumber
 })
 interface Prices {
-  bidPrice: Array<Number>
-  askPrice: Array<Number>
-  volume: Array<Number>
+  bidPrice: Array<number>
+  askPrice: Array<number>
+  volume: Array<number>
+  lastPrice: Array<number>
 }
 
 interface xxx {
   lastUpdate: Date
   contract: Contract
 }
-var pricesDict = new Map<Number, Prices>()
-var tickers = new Map<Number, xxx>()
+var pricesDict = new Map<number, Prices>()
+var tickers = new Map<number, xxx>()
 
 interface Position {
   symbol?: string;
@@ -73,6 +77,36 @@ function mapToPosition (contract: Contract, pos: number, avgCost: number, accoun
   }
 }
 
+function mapToChartFormat(id: number){
+  var metadata = tickers.get(id)
+  var comparableTime = new Date(metadata?.lastUpdate!)
+  comparableTime.setSeconds(metadata!.lastUpdate.getSeconds() + CANDLESTICK_SECONDS)
+  console.log(comparableTime)
+  console.log(new Date())
+  if(new Date() > comparableTime){
+    console.log("inside if")
+    var lastPriceList = pricesDict.get(id)?.lastPrice
+    if(lastPriceList != undefined && lastPriceList.length > 0){
+      console.log("inside second if")
+      var open = lastPriceList[0]
+      var close = lastPriceList[lastPriceList.length-1]
+      var high = Math.max(...lastPriceList)
+      var low = Math.min(...lastPriceList)
+      var date = new Date()
+      var ab = [date, open, high, low, close]
+      var cd = [date, 0] 
+
+      metadata!.lastUpdate = new Date();
+      pricesDict.get(id)!.lastPrice = []
+      
+      store.dispatch(storeName + '/socketOnmessage', {
+        data: JSON.stringify({[metadata?.contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
+      })
+    }
+    
+  }
+}
+
 // Object.freeze(ib)
 export default {
    async getPosition () {
@@ -102,7 +136,8 @@ export default {
       tickers.set(id, metadata)
       var price: Prices = {askPrice : [],
         bidPrice: [],
-        volume: []}
+        volume: [],
+        lastPrice: []}
         pricesDict.set(id,price)
     })
     ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
@@ -118,12 +153,18 @@ export default {
         tickList?.askPrice.push(value)
       } else if (TickType.BID === field || TickType.DELAYED_BID === field){
         tickList?.bidPrice.push(value)
+      } else if(TickType.DELAYED_LAST === field || TickType.LAST === field){
+        console.log("push " + tickerId)
+        tickList?.lastPrice.push(value)
+        mapToChartFormat(tickerId);
       }
+     
     })
     ib.on(EventName.tickSize, (tickerId: number, field: TickType, value: number)=> {
       var tickList = pricesDict.get(tickerId)
-      if(TickType.VOLUME === field){
+      if(TickType.RT_TRD_VOLUME === field){
         tickList?.volume.push(value)
+        console.log("RTD " + value)
       }
     })
     ib.reqIds();
