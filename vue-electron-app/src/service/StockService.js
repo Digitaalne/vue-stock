@@ -49,11 +49,7 @@ export default {
       this.possibleSymbols = []
     } */
   },
-  async testfunc () {
-    var order = {}
-    order.side = "buy"
-    order.type = "market"
-    order.qty = 1
-    ibService.placeOrder(order, null)
+  cancelSubscription(data){
+    ibService.cancelSubscription(data.metadata.tickerId);
   }
 }

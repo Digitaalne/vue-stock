@@ -1,57 +1,64 @@
 <template>
-  <div id="live" class = "container">
+  <div id="live" class="container">
     <div>
       <search v-on:stockSearch="findStock($event)"></search>
       <br />
       <div>
-        <chart v-on:closeChart="deleteChart($event)" v-for="(stk, name) in message" :key="stk.t" v-bind:incData="stk" v-bind:name="name" v-bind:rangeSelect="rangeSelect"></chart>
+        <chart
+          v-on:closeChart="deleteChart($event)"
+          v-for="(stk, name) in message"
+          :key="stk.t"
+          v-bind:incData="stk"
+          v-bind:name="name"
+          v-bind:rangeSelect="rangeSelect"
+        ></chart>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import stockService from '../service/StockService.js'
-import chart from '../components/Chart/Chart.vue'
-import { mapState } from 'vuex'
-import store from '../store/index'
-import search from '../components/Chart/Search.vue'
+import stockService from "../service/StockService.js";
+import chart from "../components/Chart/Chart.vue";
+import { mapState } from "vuex";
+import store from "../store/index";
+import search from "../components/Chart/Search.vue";
 
-const storeName = 'socketModule'
+const storeName = "socketModule";
 export default {
-  name: 'live',
+  name: "live",
   components: { chart, search },
-  data () {
+  data() {
     return {
       stockCode: null,
       rangeSelect: {
         buttons: [
           {
-            type: 'hour',
+            type: "hour",
             count: 1,
-            text: '1h'
+            text: "1h",
           },
           {
-            type: 'day',
+            type: "day",
             count: 1,
-            text: '1D'
-          }
+            text: "1D",
+          },
         ],
         selected: 1,
-        inputEnabled: false
-      }
-    }
+        inputEnabled: false,
+      },
+    };
   },
   methods: {
     findStock: async function (stockCode) {
       if (!stockCode) {
         this.$notify({
-          group: 'app',
-          text: 'Missing input',
-          type: 'warn'
-        })
+          group: "app",
+          text: "Missing input",
+          type: "warn",
+        });
       } else {
-       /*  var start = new Date()
+        /*  var start = new Date()
         start.setHours(0, 0, 0, 0)
         store.dispatch(storeName + '/socketOnmessage', {
           data: JSON.stringify(
@@ -67,20 +74,18 @@ export default {
         stockService.getStockInformation(stockCode);
       }
     },
-    deleteChart (stockCode) {
+    deleteChart(data) {
       // this.$socket.send('u-' + stockCode.trim())
-      store.dispatch(storeName + '/unsubscribe', stockCode)
-    }
+      store.dispatch(storeName + "/unsubscribe", data.metadata.contract.symbol);
+      stockService.cancelSubscription(data);
+    },
   },
   computed: {
-    ...mapState(storeName, ['message'])
+    ...mapState(storeName, ["message"]),
   },
-  mounted() {
-    stockService.testfunc();
-  },
-  beforeCreate () {
-    store.dispatch(storeName + '/resetState')
-  }
-}
+  /*   beforeCreate() {
+    store.dispatch(storeName + "/resetState");
+  }, */
+};
 </script>
 

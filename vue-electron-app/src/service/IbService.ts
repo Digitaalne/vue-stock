@@ -27,6 +27,7 @@ interface Prices {
 interface xxx {
   lastUpdate: Date
   contract: Contract
+  tickerId: number
 }
 var pricesDict = new Map<number, Prices>()
 var tickers = new Map<number, xxx>()
@@ -92,7 +93,7 @@ function mapToChartFormat(id: number){
       var close = lastPriceList[lastPriceList.length-1]
       var high = Math.max(...lastPriceList)
       var low = Math.min(...lastPriceList)
-      var date = new Date()
+      var date = new Date().getTime()
       var ab = [date, open, high, low, close]
       var cd = [date, 0] 
 
@@ -100,7 +101,7 @@ function mapToChartFormat(id: number){
       pricesDict.get(id)!.lastPrice = []
       
       store.dispatch(storeName + '/socketOnmessage', {
-        data: JSON.stringify({[metadata?.contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
+        data: JSON.stringify({[metadata?.contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd], metadata: metadata}})
       })
     }
     
@@ -132,7 +133,8 @@ export default {
       ib.reqMktData(id, contract, "", false, false);
       var metadata: xxx = 
       {lastUpdate : new Date(),
-      contract: contract}
+      contract: contract,
+      tickerId: id}
       tickers.set(id, metadata)
       var price: Prices = {askPrice : [],
         bidPrice: [],
@@ -214,14 +216,8 @@ export default {
     return prom;
   },
   placeOrder(input: any, contract: Contract){
-    console.log("hi")
-    let cont:Contract = new Object();
-    cont.conId=36285627;
-    cont.currency = "USD";
-    cont.secType = SecType.STK;
-    cont.symbol = "GME";
-    cont.exchange = "NYSE"
-
+    console.log("placed contract ");
+    console.log(contract.symbol)
     var order: Order = new Object()
 
     switch(input.type) {
@@ -259,7 +255,7 @@ export default {
     }
     order.account = account
     ib.once(EventName.nextValidId, (id:number) => {
-      ib.placeOrder(id, cont, order)
+      ib.placeOrder(id, contract, order)
     })
     ib.on(EventName.openOrder, (orderId: number, contract: Contract, order: Order, orderState: OrderState)  => {
       console.log("status " + orderState.status)
@@ -301,5 +297,8 @@ export default {
     })
       ib.reqIds();
       return prom;
+  },
+  cancelSubscription(tickerId: number){
+    ib.cancelMktData(tickerId)
   }
 }

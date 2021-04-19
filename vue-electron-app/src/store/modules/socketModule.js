@@ -27,6 +27,7 @@ const mutations = {
     for (var i = 0; i < keys.length; i++) {
       if (keys[i] in state.message) {
         Vue.set(state.message, keys[i], {
+          ...state.message[keys[i]],
           stock_data_list: [
             ...state.message[keys[i]].stock_data_list,
             ...toObj[keys[i]].stock_data_list
