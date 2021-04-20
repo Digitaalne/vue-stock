@@ -1,5 +1,10 @@
-import { IBApi, EventName, Contract, ErrorCode, ExecutionFilter, Execution, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
+import { Position } from '@/interfaces/Position';
+import { PriceInterface } from '@/interfaces/PriceInterface';
+import { StockMetadata } from '@/interfaces/StockMetadata';
+import { History } from '@/interfaces/History';
+import { IBApi, EventName, Contract, ErrorCode, Execution, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
 import store from '../store/index'
+import { PriceInterface2 } from '@/interfaces/PriceInterface2';
 
 const CANDLESTICK_SECONDS = 120;
 let portString = localStorage.getItem("PORT")
@@ -13,54 +18,14 @@ if(portString == null && localStorage.getItem("SERVICE") === "IBKR") {
   portNumber = parseInt(portString!)
 }
 
-const storeName = 'socketModule'
+const barsStoreName = 'socketModule'
+const priceStoreName = "prices"
 const ib = new IBApi({
   port: portNumber
 })
-interface Prices {
-  bidPrice: Array<number>
-  askPrice: Array<number>
-  volume: Array<number>
-  lastPrice: Array<number>
-}
 
-interface xxx {
-  lastUpdate: Date
-  contract: Contract
-  tickerId: number
-}
-var pricesDict = new Map<number, Prices>()
-var tickers = new Map<number, xxx>()
-
-interface Position {
-  symbol?: string;
-  exchange?: string;
-  asset_class?: string;
-  avg_entry_price?: number;
-  qty?: number;
-  market_value?: number;
-  cost_basis?: number;
-  unrealized_pl?: number;
-  unrealized_plpc?: number;
-  unrealized_intraday_pl?: number;
-  unrealized_intraday_plpc?: number;
-  current_price?: number;
-  lastday_price?: number;
-  change_today?: number;
-  account?: string;
-}
-
-interface History {
-  symbol?: string;
-  activity_type?: string;
-  cum_qty?: number;
-  leaves_qty?: number;
-  price?: number;
-  qty?: number;
-  side?: string;
-  type?: string;
-  transaction_time?: Date
-}
+var pricesDict = new Map<number, PriceInterface>()
+var tickers = new Map<number, StockMetadata>()
 
 ib.connect()
 ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
@@ -100,7 +65,7 @@ function mapToChartFormat(id: number){
       metadata!.lastUpdate = new Date();
       pricesDict.get(id)!.lastPrice = []
       
-      store.dispatch(storeName + '/socketOnmessage', {
+      store.dispatch(barsStoreName + '/socketOnmessage', {
         data: JSON.stringify({[metadata?.contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd], metadata: metadata}})
       })
     }
@@ -131,12 +96,12 @@ export default {
     ib.once(EventName.nextValidId, (id: number) => {
       //ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
       ib.reqMktData(id, contract, "", false, false);
-      var metadata: xxx = 
+      var metadata: StockMetadata = 
       {lastUpdate : new Date(),
       contract: contract,
       tickerId: id}
       tickers.set(id, metadata)
-      var price: Prices = {askPrice : [],
+      var price: PriceInterface = {askPrice : [],
         bidPrice: [],
         volume: [],
         lastPrice: []}
@@ -145,7 +110,7 @@ export default {
     ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
       var ab = [date, open, high, low, close]
       var cd = [date, volume]
-      store.dispatch(storeName + '/socketOnmessage', {
+      store.dispatch(barsStoreName + '/socketOnmessage', {
         data: JSON.stringify({[contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd]}})
       })
     })
@@ -153,12 +118,28 @@ export default {
       var tickList = pricesDict.get(tickerId)
       if(TickType.DELAYED_ASK === field || TickType.ASK === field){
         tickList?.askPrice.push(value)
+        let price: PriceInterface2 = {
+          askPrice: value,
+          name: tickers.get(tickerId)?.contract.symbol!
+        }
+        store.dispatch(priceStoreName + "/update", price)
       } else if (TickType.BID === field || TickType.DELAYED_BID === field){
         tickList?.bidPrice.push(value)
+        let price: PriceInterface2 = {
+          bidPrice: value,
+          name: tickers.get(tickerId)?.contract.symbol!
+        }
+        store.dispatch(priceStoreName + "/update", price)
       } else if(TickType.DELAYED_LAST === field || TickType.LAST === field){
         console.log("push " + tickerId)
         tickList?.lastPrice.push(value)
+        let price: PriceInterface2 = {
+          lastPrice: value,
+          name: tickers.get(tickerId)?.contract.symbol!
+        }
+        store.dispatch(priceStoreName + "/update", price)
         mapToChartFormat(tickerId);
+        
       }
      
     })
@@ -242,7 +223,7 @@ export default {
         order.action = OrderAction.SELL;
         break;
     }
-
+    order.transmit = true;
     order.totalQuantity = input.qty;
     order.orderType = OrderType.MKT;
     order.lmtPrice = input.limit_price;
