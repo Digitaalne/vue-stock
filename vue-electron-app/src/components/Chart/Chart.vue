@@ -1,5 +1,6 @@
 <template>
   <div id="chart">
+    <price :name="this.name"></price>
     <md-button v-on:click="changeModalVisibility">BUY OR SELL</md-button>
     <md-button @click="toggleFav()">
       <span v-if="isFavourite"><md-icon>favorite</md-icon></span>
@@ -101,11 +102,14 @@ import Highcharts from "highcharts";
 import stockInit from "highcharts/modules/stock";
 import paperService from "../../service/PaperService.js";
 import favouriteService from "../../service/FavouriteService.js";
+import Price from "../Price.vue";
+
 stockInit(Highcharts);
 export default {
   props: ["incData", "name", "rangeSelect"],
   components: {
     modal,
+    Price,
   },
   data() {
     return {
@@ -173,6 +177,12 @@ export default {
         ],
       },
     };
+  },
+  watch: {
+    incData: function (newState) {
+      this.stockOptions.series[0].data = newState.stock_data_list;
+      this.stockOptions.series[1].data = newState.stock_volume_list;
+    },
   },
   methods: {
     placeOrder: async function () {
