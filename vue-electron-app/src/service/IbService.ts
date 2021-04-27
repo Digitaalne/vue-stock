@@ -90,23 +90,39 @@ export default {
     return prom 
   },
   getRealTimeBars (contract: Contract) {
-    contract.exchange = contract.primaryExch
+    //contract.exchange = contract.primaryExch
+    contract.exchange = "SMART"
     ib.reqMarketDataType(4);
     console.log(contract)
     ib.once(EventName.nextValidId, (id: number) => {
       //ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
       ib.reqMktData(id, contract, "", false, false);
-      var metadata: StockMetadata = 
-      {lastUpdate : new Date(),
-      contract: contract,
-      tickerId: id}
+
+      var metadata: StockMetadata = {
+        lastUpdate : new Date(),
+        contract: contract,
+        tickerId: id
+      }
+
       tickers.set(id, metadata)
-      var price: PriceInterface = {askPrice : [],
+
+      var price: PriceInterface = {
+        askPrice : [],
         bidPrice: [],
         volume: [],
-        lastPrice: []}
-        pricesDict.set(id,price)
+        lastPrice: []
+      }
+      pricesDict.set(id,price)
+
+      let price2: PriceInterface2 = {
+        name: contract.symbol!,
+        metadata: metadata
+      }
+      
+      store.dispatch(priceStoreName + "/update", price2)
+
     })
+
     ib.on(EventName.realtimeBar, (reqId: number, date: number, open: number, high: number, low: number, close: number, volume: number, WAP: number, count: number) => {
       var ab = [date, open, high, low, close]
       var cd = [date, volume]
@@ -139,7 +155,6 @@ export default {
         }
         store.dispatch(priceStoreName + "/update", price)
         mapToChartFormat(tickerId);
-        
       }
      
     })
@@ -198,7 +213,7 @@ export default {
   },
   placeOrder(input: any, contract: Contract){
     console.log("placed contract ");
-    console.log(contract.symbol)
+    console.log(contract)
     var order: Order = new Object()
 
     switch(input.type) {

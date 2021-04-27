@@ -34,13 +34,19 @@ const mutations = {
                 volume: event.volume
             })
         }
-    }
+    },
+    DELETE (state, key) {
+        Vue.delete(state.stockPrices, key)
+      }
 }
 
 const actions = {
     update ({ commit }, event ) {
         commit('UPDATE', event)
     },
+    delete ({ commit }, event) {
+        commit('DELETE', event)
+      }
 }
 
 
