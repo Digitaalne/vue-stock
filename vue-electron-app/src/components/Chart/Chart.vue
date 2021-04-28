@@ -87,12 +87,9 @@ export default {
     message: {
       deep: true,
       handler(newState) {
-        if (newState.data !== undefined) {
-          this.stockOptions.series[0].data =
-            newState[this.name].stock_data_list;
-          this.stockOptions.series[1].data =
-            newState[this.name].stock_volume_list;
-        }
+        this.stockOptions.series[0].data = newState[this.name].stock_data_list;
+        this.stockOptions.series[1].data =
+          newState[this.name].stock_volume_list;
       },
     },
   },

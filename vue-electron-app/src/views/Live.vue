@@ -37,7 +37,7 @@ export default {
   components: { search, price },
   data() {
     return {
-      stockCode: null,
+      stockCode: null
     }
   },
   methods: {

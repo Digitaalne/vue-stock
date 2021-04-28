@@ -6,7 +6,7 @@ import { IBApi, EventName, Contract, ErrorCode, Execution, ContractDescription, 
 import store from '../store/index'
 import { PriceInterface2 } from '@/interfaces/PriceInterface2';
 
-const CANDLESTICK_SECONDS = 120;
+const CANDLESTICK_SECONDS = 60;
 let portString = localStorage.getItem("PORT")
 let portNumber;
 
@@ -60,13 +60,15 @@ function mapToChartFormat(id: number){
       var low = Math.min(...lastPriceList)
       var date = new Date().getTime()
       var ab = [date, open, high, low, close]
-      var cd = [date, 0] 
+      var cd = [date, 0]
 
-      metadata!.lastUpdate = new Date();
+      let obj = {};
+      Object.assign(obj, tickers.get(id))
+      tickers.get(id)!.lastUpdate = new Date(); //SEE RIDA VIGANE
       pricesDict.get(id)!.lastPrice = []
-      
+
       store.dispatch(barsStoreName + '/socketOnmessage', {
-        data: JSON.stringify({[metadata?.contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd], metadata: metadata}})
+        data: JSON.stringify({[metadata?.contract.symbol!]: {stock_data_list: [ab], stock_volume_list : [cd], "metadata": obj}})
       })
     }
     
