@@ -75,7 +75,6 @@ function mapToChartFormat(id: number){
   }
 }
 
-// Object.freeze(ib)
 export default {
    async getPosition () {
     var prom = new Promise(function(resolve, reject) {

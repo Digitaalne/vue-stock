@@ -37,7 +37,8 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "src/main.ts",
-    "src/store/modules/prices.js"
+    "src/store/modules/prices.js",
+    "src/service/ConfService.js"
   ],
   "exclude": [
     "node_modules"

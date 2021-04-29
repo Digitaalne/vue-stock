@@ -1,55 +1,56 @@
-import AxiosService from './AxiosService'
 import ibService from './IbService'
+import alpacaService from './AlpacaService.ts'
+import confService from '../service/ConfService'
 
-const STOCK_URL = 'stock'
-const BARS_URL = STOCK_URL + '/bars'
-const SEARCH_URL = STOCK_URL + '/lookup'
 export default {
   async getStockInformation (startDate, endDate, symbol, tf) {
-    /* return AxiosService.get(BARS_URL, {
-      params: {
-        start: startDate,
-        end: endDate,
-        symbol: symbol,
-        timeframe: tf
-      }
-    }) */
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      return
+    } else if(activeService === "ALPACA"){
+      alpacaService.getHistoricalData(startDate, endDate, symbol, tf)
+    }
+    //TODO:: ADD
   },
   async getStockInformation (stock) {
-    ibService.getRealTimeBars(stock.contract)
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      ibService.getRealTimeBars(stock.contract)
+    } else if(activeService === "ALPACA"){
+      console.log(stock)
+      alpacaService.getRealTimeBars(stock.symbol)
+    }
+    
   },
   async searchStockSymbol (symbol) {
-    if(symbol.length >= 1) {
-      var stocks = await ibService.searchStockSymbol(symbol);
-      stocks = stocks.slice(0,10)
-      var resp = [];
-      for (var i = 0; i < stocks.length; i++) {
-        let mappedStock = {}
-        mappedStock.symbol = stocks[i].contract.symbol;
-        mappedStock.description = stocks[i].contract.primaryExch + " " + stocks[i].contract.currency;
-        mappedStock.contract = stocks[i].contract;
-        resp.push(mappedStock);
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      if(symbol.length >= 1) {
+        var stocks = await ibService.searchStockSymbol(symbol);
+        stocks = stocks.slice(0,10)
+        var resp = [];
+        for (var i = 0; i < stocks.length; i++) {
+          let mappedStock = {}
+          mappedStock.symbol = stocks[i].contract.symbol;
+          mappedStock.description = stocks[i].contract.primaryExch + " " + stocks[i].contract.currency;
+          mappedStock.contract = stocks[i].contract;
+          resp.push(mappedStock);
+        }
+        return resp;
       }
-      return resp;
+    } else if(activeService === "ALPACA"){
+      return alpacaService.searchStockSymbol(symbol)
     }
+    
     return;
-    //return AxiosService.get(SEARCH_URL + '?q=' + symbol)
-   /*  if (this.symbol.length >= 1) {
-      var resp = await stockService.searchStockSymbol(this.symbol)
-      if (this.symbol.length === 0) return
-      if (resp.securities && Array.isArray(resp.securities.security)) {
-        this.possibleSymbols = resp.securities.security.slice(0, 10)
-      } else if (
-        resp.securities &&
-        !Array.isArray(resp.securities.security)
-      ) {
-        this.possibleSymbols = [resp.securities.security]
-      }
-    } else {
-      this.possibleSymbols = []
-    } */
+    
   },
   cancelSubscription(data){
-    ibService.cancelSubscription(data.metadata.tickerId);
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      ibService.cancelSubscription(data.metadata.tickerId);
+    } else if(activeService === "ALPACA"){
+      alpacaService.cancelSubscription()
+    }
   }
 }

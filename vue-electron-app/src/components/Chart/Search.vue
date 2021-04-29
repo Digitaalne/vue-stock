@@ -1,5 +1,5 @@
 <template>
-  <div class = "half centered">
+  <div class="half centered">
     <div class="md-layout md-gutter">
       <div class="md-layout-item">
         <md-field>
@@ -13,20 +13,21 @@
           <md-button class="md-primary" @click="startSearch">Search</md-button>
         </md-field>
       </div>
-      
-        <md-speed-dial md-direction="bottom" id="fav-but">
-          <md-speed-dial-target>
-            <md-icon>favorite</md-icon>
-          </md-speed-dial-target>
-          <md-speed-dial-content class="fav-selection">
-            <md-button
-              v-for="(fav, index) in favs"
-              :key="index"
-              @click="finishAutocomplete(fav)"
-              class="md-icon-button"
-            >{{fav}}</md-button>
-          </md-speed-dial-content>
-        </md-speed-dial>
+
+      <md-speed-dial md-direction="bottom" id="fav-but">
+        <md-speed-dial-target>
+          <md-icon>favorite</md-icon>
+        </md-speed-dial-target>
+        <md-speed-dial-content class="fav-selection">
+          <md-button
+            v-for="(fav, index) in favs"
+            :key="index"
+            @click="finishAutocomplete(fav)"
+            class="md-icon-button"
+            >{{ fav }}</md-button
+          >
+        </md-speed-dial-content>
+      </md-speed-dial>
     </div>
     <div v-on:blur="possibleSymbols = []">
       <span
@@ -35,10 +36,15 @@
         @click="finishAutocomplete(searchAnswer)"
       >
         <span>
-          <span>{{searchAnswer.symbol}} - {{searchAnswer.description}}</span>
-          <md-button class="md-icon-button pd" @click="toggleFav(searchAnswer.symbol)">
+          <span
+            >{{ searchAnswer.symbol }} - {{ searchAnswer.description }}</span
+          >
+          <md-button
+            class="md-icon-button pd"
+            @click="toggleFav(searchAnswer.symbol)"
+          >
             <span v-if="isFav(searchAnswer.symbol)">
-              <md-icon > favorite</md-icon>
+              <md-icon> favorite</md-icon>
             </span>
             <span v-else>
               <md-icon>favorite_border</md-icon>
@@ -52,51 +58,55 @@
 </template>
 
 <script>
-import favouriteService from '../../service/FavouriteService.js'
-import stockService from '../../service/StockService.js'
-import debounce from 'debounce'
+import favouriteService from "../../service/FavouriteService.js";
+import stockService from "../../service/StockService.js";
+import debounce from "debounce";
 export default {
-  name: 'Search',
-  data () {
+  name: "Search",
+  data() {
     return {
-      symbol: '',
+      symbol: "",
       selectedStock: Object,
       possibleSymbols: [],
-      favs: null
-    }
+      favs: null,
+    };
   },
   methods: {
-    async searchStockSymbol () {
-      this.possibleSymbols = await stockService.searchStockSymbol(this.symbol)
+    async searchStockSymbol() {
+      this.possibleSymbols = await stockService.searchStockSymbol(this.symbol);
     },
 
-    finishAutocomplete (stock) {
-      this.symbol = stock.symbol
+    finishAutocomplete(stock) {
+      this.symbol = stock.symbol;
       this.selectedStock = stock;
-      this.possibleSymbols = []
+      this.possibleSymbols = [];
     },
 
-    startSearch () {
-      this.$emit('stockSearch', this.selectedStock)
-      this.symbol = ''
-      this.possibleSymbols = []
+    startSearch() {
+      if (this.selectedStock.symbol === undefined) {
+        this.selectedStock.symbol = this.symbol;
+      }
+      this.$emit("stockSearch", this.selectedStock);
+      this.symbol = "";
+      this.selectedStock = {};
+      this.possibleSymbols = [];
     },
 
-    isFav (symbol) {
-      return favouriteService.isFav(symbol)
+    isFav(symbol) {
+      return favouriteService.isFav(symbol);
     },
 
-    toggleFav (symbol) {
-      return favouriteService.toggleFav(symbol)
-    }
+    toggleFav(symbol) {
+      return favouriteService.toggleFav(symbol);
+    },
   },
-  created () {
-    this.searchStockSymbol = debounce(this.searchStockSymbol, 300)
+  created() {
+    this.searchStockSymbol = debounce(this.searchStockSymbol, 300);
   },
-  mounted () {
-    this.favs = favouriteService.getFavs()
-  }
-}
+  mounted() {
+    this.favs = favouriteService.getFavs();
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -104,11 +114,13 @@ export default {
   overflow: visible;
   margin-top: 15px;
 }
-.pd{padding-bottom: 20px;}
+.pd {
+  padding-bottom: 20px;
+}
 
-.fav-selection{
-  position:absolute;
-  align-self:center;
-  margin-top:60px;
+.fav-selection {
+  position: absolute;
+  align-self: center;
+  margin-top: 60px;
 }
 </style>
