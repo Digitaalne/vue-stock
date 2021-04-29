@@ -41,8 +41,8 @@
 </template>
 
 <script>
-// import paperService from '../service/PaperService.js'
- import ibService from '../service/IbService.ts'
+ import paperService from '../service/PaperService.js'
+// import ibService from '../service/IbService.ts'
 
 export default {
   data () {
@@ -52,7 +52,7 @@ export default {
   },
   methods: {
     async loadData () {
-      //this.positionList = ibService.getPosition()
+      this.positionList = await paperService.getPositionList()
     }
   },
   created () {
