@@ -4,7 +4,7 @@
       <search v-on:stockSearch="findStock($event)"></search>
       <br />
       <div>
-<!--         <chart
+        <!--         <chart
           v-on:closeChart="deleteChart($event)"
           v-for="(stk, name) in message"
           :key="stk.t"
@@ -27,7 +27,6 @@
 <script>
 import stockService from "../service/StockService.js";
 import { mapState } from "vuex";
-import store from "../store/index";
 import search from "../components/Chart/Search.vue";
 import price from "../components/Price.vue";
 
@@ -37,8 +36,8 @@ export default {
   components: { search, price },
   data() {
     return {
-      stockCode: null
-    }
+      stockCode: null,
+    };
   },
   methods: {
     findStock: async function (stockCode) {
@@ -67,7 +66,6 @@ export default {
     },
     deleteChart(data) {
       // this.$socket.send('u-' + stockCode.trim())
-      store.dispatch(pricesStoreName + "/delete", data.metadata.contract.symbol);
       stockService.cancelSubscription(data);
     },
   },

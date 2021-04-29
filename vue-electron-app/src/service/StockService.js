@@ -46,11 +46,12 @@ export default {
     
   },
   cancelSubscription(data){
+    console.log(data)
     let activeService = confService.getActiveService() 
     if(activeService === "IBKR"){
-      ibService.cancelSubscription(data.metadata.tickerId);
+      ibService.cancelSubscription(data);
     } else if(activeService === "ALPACA"){
-      alpacaService.cancelSubscription()
+      alpacaService.cancelSubscription(data.name)
     }
   }
 }

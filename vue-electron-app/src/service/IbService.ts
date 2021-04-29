@@ -295,7 +295,8 @@ export default {
       ib.reqIds();
       return prom;
   },
-  cancelSubscription(tickerId: number){
-    ib.cancelMktData(tickerId)
+  cancelSubscription(data:any){
+    store.dispatch(priceStoreName + "/delete", data.metadata.contract.symbol);
+    ib.cancelMktData(data.metadata.tickerId)
   }
 }
