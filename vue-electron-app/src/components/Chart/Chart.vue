@@ -1,6 +1,10 @@
 <template>
   <div id="chart">
-    <span v-if="this.stockOptions.series[0].data !== null">
+    <span
+      v-if="
+        this.incData !== undefined && this.stockOptions.series[0].data !== null
+      "
+    >
       <highcharts
         class="stock"
         :constructor-type="'stockChart'"
@@ -14,18 +18,12 @@
 <script>
 import modal from "../Modal.vue";
 import Highcharts from "highcharts";
-import { mapState } from "vuex";
 import stockInit from "highcharts/modules/stock";
-
-const storeName = "socketModule";
 stockInit(Highcharts);
 export default {
-  props: ["name", "rangeSelect"],
+  props: ["name", "rangeSelect", "incData"],
   components: {
     modal,
-  },
-  computed: {
-    ...mapState(storeName, ["message"]),
   },
   data() {
     return {
@@ -70,13 +68,13 @@ export default {
           {
             type: "candlestick",
             name: this.name,
-            data: null,
+            data: this.incData?.stock_data_list,
             turboThreshold: 10000,
           },
           {
             type: "column",
             name: "Volume",
-            data: null,
+            data: this.incData?.stock_volume_list,
             yAxis: 1,
           },
         ],
@@ -84,12 +82,11 @@ export default {
     };
   },
   watch: {
-    message: {
+    incData: {
       deep: true,
       handler(newState) {
-        this.stockOptions.series[0].data = newState[this.name].stock_data_list;
-        this.stockOptions.series[1].data =
-          newState[this.name].stock_volume_list;
+        this.stockOptions.series[0].data = newState.stock_data_list;
+        this.stockOptions.series[1].data = newState.stock_volume_list;
       },
     },
   },

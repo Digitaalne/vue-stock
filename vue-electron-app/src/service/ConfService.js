@@ -7,6 +7,9 @@ export default {
     getActiveService(){
         return config.get('service')
     },
+    getActiveDataService(){
+        return config.get('dataService')
+    },
     getConfiguration(name){
         return config.get(name)
     },
@@ -15,6 +18,13 @@ export default {
     },
     setServiceConfiguration(name,value){
         config.set(this.getActiveService() + "." + name, value)
+
+    },
+    getDataServiceConfiguration(name){
+        return config.get(this.getActiveDataService() + "." +name)
+    },
+    setDataServiceConfiguration(name,value){
+        config.set(this.getActiveDataService() + "." + name, value)
 
     },
     setConfiguration(name,value){

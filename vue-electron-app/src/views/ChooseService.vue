@@ -50,6 +50,34 @@
         </md-card>
       </div>
     </div>
+    <div v-if="service !== undefined">
+      <md-radio
+        v-if="service === 'IBKR'"
+        id="dataService"
+        name="dataServices"
+        v-model="dataService"
+        :value="'IBKR'"
+        @change="setDataService"
+        >IBKR</md-radio
+      >
+      <md-radio
+        v-if="service === 'ALPACA'"
+        id="dataService"
+        name="dataServices"
+        v-model="dataService"
+        :value="'ALPACA'"
+        @change="setDataService"
+        >ALPACA</md-radio
+      >
+      <md-radio
+        id="dataService"
+        name="dataServices"
+        v-model="dataService"
+        :value="'FMP'"
+        @change="setDataService"
+        >FMP</md-radio
+      >
+    </div>
     <div id="ibkr" v-if="service === 'IBKR'">
       <md-field>
         <label for="ibkr-port">IBKR API Port:</label>
@@ -95,6 +123,16 @@
         >Use paper account</md-switch
       >
     </div>
+    <div v-if="dataService === 'FMP'">
+      <md-field>
+        <label for="ibkr-port">FMP api key:</label>
+        <md-input
+          id="fmp-apikey"
+          v-model="apiKey"
+          v-debounce:300ms="setApiKey"
+        ></md-input>
+      </md-field>
+    </div>
   </div>
 </template>
 
@@ -113,18 +151,19 @@ export default {
       keyId: String,
       secretKey: String,
       paper: Boolean,
+      dataService: String,
+      apiKey: String,
     };
   },
   created() {
-    //this.port = localStorage.getItem("PORT")
-    //this.service = localStorage.getItem("SERVICE")
-    //this.account = localStorage.getItem("ACCOUNT")
     this.port = confService.getServiceConfiguration("port");
     this.service = confService.getActiveService();
     this.account = confService.getServiceConfiguration("account");
     this.keyId = confService.getServiceConfiguration("keyId");
     this.secretKey = confService.getServiceConfiguration("secretKey");
     this.paper = confService.getServiceConfiguration("paper");
+    this.dataService = confService.getActiveDataService();
+    this.apiKey = confService.getDataServiceConfiguration("apiKey");
   },
   methods: {
     setPort() {
@@ -133,6 +172,12 @@ export default {
     setService(service) {
       confService.setConfiguration("service", service);
       this.service = service;
+      if (
+        this.dataService !== undefined &&
+        (this.dataService !== this.service || this.dataService !== "FMP")
+      ) {
+        this.setDataService(this.service);
+      }
     },
     async getAccounts() {
       if (this.service === "IBKR") {
@@ -150,6 +195,12 @@ export default {
     },
     setPaper() {
       confService.setServiceConfiguration("paper", this.paper);
+    },
+    setDataService() {
+      confService.setConfiguration("dataService", this.dataService);
+    },
+    setApiKey() {
+      confService.setDataServiceConfiguration("apiKey", this.apiKey);
     },
   },
   mounted() {

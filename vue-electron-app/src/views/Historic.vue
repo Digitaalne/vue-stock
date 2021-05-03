@@ -3,8 +3,8 @@
     <div id="selection">
       <div class="half centered">
         <div class="md-layout-item">
-          <span class="md-caption">Date Range</span>
-          <v-date-picker name="dates" v-model="dates" mode="range" />
+          <span class="md-caption" for="dates">Date Range</span>
+          <v-date-picker name="dates" v-model="dates" is-range />
         </div>
         <div class="md-layout-item">
           <span class="md-caption">Timeframe</span>
@@ -48,7 +48,7 @@ export default {
       dates: null,
       symbol: null,
       timeframe: null,
-      stockList: {},
+      stockList: [],
       rangeSelect: {
         buttons: [
           {
@@ -64,15 +64,15 @@ export default {
   methods: {
     searchStockInfo: async function (symbol) {
       if (this.checkInput(symbol)) {
-        var helper = await StockService.getStockInformation(
+        var helper = await StockService.getHistoricStockInformation(
           this.dates.start,
           this.dates.end,
           symbol,
           this.timeframe
         );
-        helper[symbol].name = symbol;
-        if (helper && helper[symbol].stock_data_list.length > 0) {
-          this.stockList = [...this.stockList, helper[symbol]];
+        if (helper && helper.stock_data_list.length > 0) {
+          this.stockList.push(helper);
+          console.log(this.stockList);
         } else {
           Vue.notify({
             group: "app",
@@ -98,9 +98,6 @@ export default {
         return stock.name !== stockCode;
       });
     },
-  },
-  mounted() {
-    this.testMethod();
   },
 };
 </script>
