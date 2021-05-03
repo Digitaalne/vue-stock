@@ -1,34 +1,36 @@
 import ibService from './IbService'
 import alpacaService from './AlpacaService.ts'
 import confService from '../service/ConfService'
+import fmpService from './FmpService'
 
 export default {
-  async getStockInformation (startDate, endDate, symbol, tf) {
-    let activeService = confService.getActiveService() 
+  async getHistoricStockInformation (startDate, endDate, stock, tf) {
+    let activeService = confService.getActiveDataService() 
     if(activeService === "IBKR"){
       return
     } else if(activeService === "ALPACA"){
-      alpacaService.getHistoricalData(startDate, endDate, symbol, tf)
+      return alpacaService.getHistoricalData(startDate, endDate, stock.symbol, tf)
+    } else if(activeService === "FMP"){
+      return fmpService.getHistoricalData(startDate, endDate, stock.symbol, tf)
     }
-    //TODO:: ADD
   },
+
   async getStockInformation (stock) {
-    let activeService = confService.getActiveService() 
+    let activeService = confService.getActiveDataService() 
     if(activeService === "IBKR"){
       ibService.getRealTimeBars(stock.contract)
     } else if(activeService === "ALPACA"){
-      console.log(stock)
       alpacaService.getRealTimeBars(stock.symbol)
     }
     
   },
   async searchStockSymbol (symbol) {
-    let activeService = confService.getActiveService() 
+    let activeService = confService.getActiveDataService() 
     if(activeService === "IBKR"){
       if(symbol.length >= 1) {
         var stocks = await ibService.searchStockSymbol(symbol);
         stocks = stocks.slice(0,10)
-        var resp = [];
+        let resp = [];
         for (var i = 0; i < stocks.length; i++) {
           let mappedStock = {}
           mappedStock.symbol = stocks[i].contract.symbol;
@@ -40,6 +42,17 @@ export default {
       }
     } else if(activeService === "ALPACA"){
       return alpacaService.searchStockSymbol(symbol)
+    } else if(activeService === "FMP"){
+      console.log("YAAS")
+      let symbols = await fmpService.searchStockSymbol(symbol)
+      let resp = [];
+        for (var i = 0; i < symbols.length; i++) {
+          let mappedStock = {}
+          mappedStock.symbol = symbols[i].symbol
+          mappedStock.description = symbols[i].name + " " + symbols[i].exchangeShortName;
+          resp.push(mappedStock);
+        }
+        return resp
     }
     
     return;
@@ -47,7 +60,7 @@ export default {
   },
   cancelSubscription(data){
     console.log(data)
-    let activeService = confService.getActiveService() 
+    let activeService = confService.getActiveDataService() 
     if(activeService === "IBKR"){
       ibService.cancelSubscription(data);
     } else if(activeService === "ALPACA"){

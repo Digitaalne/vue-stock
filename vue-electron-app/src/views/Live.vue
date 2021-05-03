@@ -15,6 +15,7 @@
         <price
           v-for="(stk, name) in stockPrices"
           :key="name"
+          v-bind:incData="message[name]"
           v-bind:name="name"
           v-bind:data="stk"
           v-on:closeChart="deleteChart($event)"
@@ -31,6 +32,7 @@ import search from "../components/Chart/Search.vue";
 import price from "../components/Price.vue";
 
 const pricesStoreName = "prices";
+const barsStoreName = "socketModule";
 export default {
   name: "live",
   components: { search, price },
@@ -71,6 +73,7 @@ export default {
   },
   computed: {
     ...mapState(pricesStoreName, ["stockPrices"]),
+    ...mapState(barsStoreName, ["message"]),
   },
   /*   beforeCreate() {
     store.dispatch(pricesStoreName + "/resetState");
