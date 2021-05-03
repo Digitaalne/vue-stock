@@ -1,10 +1,10 @@
 <template>
-  <div id="historic" class = "container">
+  <div id="historic" class="container">
     <div id="selection">
       <div class="half centered">
         <div class="md-layout-item">
-          <span class="md-caption">Date Range</span>
-          <v-date-picker name="dates" v-model="dates" mode="range" />
+          <span class="md-caption" for="dates">Date Range</span>
+          <v-date-picker name="dates" v-model="dates" is-range />
         </div>
         <div class="md-layout-item">
           <span class="md-caption">Timeframe</span>
@@ -32,78 +32,72 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import StockService from '../service/StockService.js'
-import chart from '../components/Chart/Chart.vue'
-import VCalendar from 'v-calendar'
-import search from '../components/Chart/Search.vue'
-import ibService from '../service/IbService.ts'
+import Vue from "vue";
+import StockService from "../service/StockService.js";
+import chart from "../components/Chart/Chart.vue";
+import VCalendar from "v-calendar";
+import search from "../components/Chart/Search.vue";
 
-Vue.use(VCalendar)
+Vue.use(VCalendar);
 
 export default {
-  name: 'historic',
+  name: "historic",
   components: { chart, VCalendar, search },
-  data () {
+  data() {
     return {
       dates: null,
       symbol: null,
       timeframe: null,
-      stockList: {},
+      stockList: [],
       rangeSelect: {
         buttons: [
           {
-            type: 'all',
-            text: 'ALL'
-          }
+            type: "all",
+            text: "ALL",
+          },
         ],
         selected: 0,
-        inputEnabled: false
-      }
-    }
+        inputEnabled: false,
+      },
+    };
   },
   methods: {
     searchStockInfo: async function (symbol) {
       if (this.checkInput(symbol)) {
-        var helper = await StockService.getStockInformation(
+        var helper = await StockService.getHistoricStockInformation(
           this.dates.start,
           this.dates.end,
           symbol,
           this.timeframe
-        )
-        helper[symbol].name = symbol
-        if (helper && helper[symbol].stock_data_list.length > 0) {
-          this.stockList = [...this.stockList, helper[symbol]]
+        );
+        if (helper && helper.stock_data_list.length > 0) {
+          this.stockList.push(helper);
+          console.log(this.stockList);
         } else {
           Vue.notify({
-            group: 'app',
-            text: 'Information not found!',
-            type: 'warn'
-          })
+            group: "app",
+            text: "Information not found!",
+            type: "warn",
+          });
         }
       }
     },
-    checkInput (symbol) {
+    checkInput(symbol) {
       if (!this.timeframe || !this.dates || !symbol) {
         Vue.notify({
-          group: 'app',
-          text: 'Missing input',
-          type: 'warn'
-        })
-        return false
+          group: "app",
+          text: "Missing input",
+          type: "warn",
+        });
+        return false;
       }
-      return true
+      return true;
     },
-    deleteChart (stockCode) {
-      this.stockList = this.stockList.filter(function (stock) { return stock.name !== stockCode })
+    deleteChart(stockCode) {
+      this.stockList = this.stockList.filter(function (stock) {
+        return stock.name !== stockCode;
+      });
     },
-    testMethod() {
-      console.log('yee', ibService.searchStockSymbol("GME"));
-      ibService.getHistoricalData(null, "20210319 23:59:59 GMT", "3 D", "1 hour")
-    }
   },
-  mounted() {
-    this.testMethod();
-  }
-}
+};
 </script>

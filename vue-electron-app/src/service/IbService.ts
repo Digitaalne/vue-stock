@@ -5,32 +5,32 @@ import { History } from '@/interfaces/History';
 import { IBApi, EventName, Contract, ErrorCode, Execution, ContractDescription, SecType, TickType, Order, OrderAction, OrderType, OrderState } from '@stoqey/ib'
 import store from '../store/index'
 import { PriceInterface2 } from '@/interfaces/PriceInterface2';
+import confService from '../service/ConfService'
 
 const CANDLESTICK_SECONDS = 60;
-let portString = localStorage.getItem("PORT")
-let portNumber;
-
-if(portString == null && localStorage.getItem("SERVICE") === "IBKR") {
- // throw error
-} else if (Number(portString) == NaN){
-  //throw error
-} else if(localStorage.getItem("SERVICE") === "IBKR") {
-  portNumber = parseInt(portString!)
-}
 
 const barsStoreName = 'socketModule'
 const priceStoreName = "prices"
-const ib = new IBApi({
-  port: portNumber
-})
+let ib:IBApi;
+
+function init(){
+  let portString = confService.getServiceConfiguration("port")
+  ib = new IBApi({
+    port: Number(portString)
+  })
+  ib.connect()
+
+  ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
+    console.error("ERROR: " + error.message + " " + code + " " + reqId)
+  })
+}
 
 var pricesDict = new Map<number, PriceInterface>()
 var tickers = new Map<number, StockMetadata>()
 
-ib.connect()
-ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
-  console.error("ERROR: " + error.message + " " + code + " " + reqId)
-})
+if(confService.getActiveService()==="IBKR"){
+  init()
+}
 
 function mapToPosition (contract: Contract, pos: number, avgCost: number, account: string) : Position {
   return {
@@ -75,7 +75,6 @@ function mapToChartFormat(id: number){
   }
 }
 
-// Object.freeze(ib)
 export default {
    async getPosition () {
     var prom = new Promise(function(resolve, reject) {
@@ -296,7 +295,8 @@ export default {
       ib.reqIds();
       return prom;
   },
-  cancelSubscription(tickerId: number){
-    ib.cancelMktData(tickerId)
+  cancelSubscription(data:any){
+    store.dispatch(priceStoreName + "/delete", data.metadata.contract.symbol);
+    ib.cancelMktData(data.metadata.tickerId)
   }
 }

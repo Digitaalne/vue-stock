@@ -1,28 +1,34 @@
-import AxiosService from './AxiosService'
 import ibService from './IbService.ts'
+import confService from './ConfService'
+import alpacaService from './AlpacaService.ts'
 
-const ORDER_API_URL = 'paper/order'
-const POSITION_API_URL = 'paper/position'
-const ACTIVITY_API_URL = 'paper/activity'
 export default {
   placeOrder (options, data) {
-    /* return AxiosService.post(ORDER_API_URL, {symbol: data.name,
-      qty: data.qty,
-      side: data.side,
-      type: data.type,
-      time_in_force: data.time_in_force,
-      stop_price: data.stop_price,
-      limit_price: data.limit_price,
-      extended_hours: data.extended_hours}) */
-    ibService.placeOrder(options, data.metadata.contract)
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      ibService.placeOrder(options, data.metadata.contract)
+    } else if(activeService === "ALPACA"){
+      alpacaService.placeOrder(options)
+    }
+    
   },
   getPositionList () {
-    //return AxiosService.get(POSITION_API_URL)
-    return ibService.getPosition()
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      return ibService.getPosition()
+    } else if(activeService === "ALPACA"){
+      return alpacaService.getPosition()
+    }
+
   },
   getActivitesList () {
-    //return AxiosService.get(ACTIVITY_API_URL)
-    return ibService.getOrderHistory()
+    let activeService = confService.getActiveService() 
+    if(activeService === "IBKR"){
+      return ibService.getOrderHistory()
+    } else if(activeService === "ALPACA"){
+      return alpacaService.getOrderHistory()
+    }
+
   }
 
 }

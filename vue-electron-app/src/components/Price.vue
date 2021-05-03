@@ -13,7 +13,11 @@
     </md-button>
     <md-button v-on:click="closeChart"><md-icon>clear</md-icon></md-button>
     <br />
-    <chart v-bind:name="name" v-bind:rangeSelect="rangeSelect"></chart>
+    <chart
+      v-bind:name="name"
+      v-bind:incData="this.incData"
+      v-bind:rangeSelect="rangeSelect"
+    ></chart>
     <!-- -->
     <md-dialog :md-active.sync="modalVisible" @close="changeModalVisibility">
       <div id="modal">
@@ -103,7 +107,7 @@ import paperService from "../service/PaperService";
 import favouriteService from "../service/FavouriteService.js";
 import chart from "./Chart/Chart";
 export default {
-  props: ["name", "data"],
+  props: ["name", "data", "incData"],
   components: { chart },
   data() {
     return {
