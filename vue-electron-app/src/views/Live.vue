@@ -38,16 +38,16 @@ export default {
   components: { search, price },
   data() {
     return {
-      stockCode: null,
+      stockCode: null
     };
   },
   methods: {
-    findStock: async function (stockCode) {
+    findStock: async function(stockCode) {
       if (!stockCode) {
         this.$notify({
           group: "app",
           text: "Missing input",
-          type: "warn",
+          type: "warn"
         });
       } else {
         /*  var start = new Date()
@@ -69,15 +69,14 @@ export default {
     deleteChart(data) {
       // this.$socket.send('u-' + stockCode.trim())
       stockService.cancelSubscription(data);
-    },
+    }
   },
   computed: {
     ...mapState(pricesStoreName, ["stockPrices"]),
-    ...mapState(barsStoreName, ["message"]),
-  },
+    ...mapState(barsStoreName, ["message"])
+  }
   /*   beforeCreate() {
     store.dispatch(pricesStoreName + "/resetState");
   }, */
 };
 </script>
-

@@ -68,7 +68,7 @@ export default {
       symbol: "",
       selectedStock: Object,
       possibleSymbols: [],
-      favs: null,
+      favs: null
     };
   },
   methods: {
@@ -98,14 +98,14 @@ export default {
 
     toggleFav(symbol) {
       return favouriteService.toggleFav(symbol);
-    },
+    }
   },
   created() {
     this.searchStockSymbol = debounce(this.searchStockSymbol, 300);
   },
   mounted() {
     this.favs = favouriteService.getFavs();
-  },
+  }
 };
 </script>
 

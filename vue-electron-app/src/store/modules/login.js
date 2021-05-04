@@ -1,32 +1,32 @@
 const state = {
   loggedIn: Boolean(isLoggedIn)
-}
+};
 
 const mutations = {
-  LOGIN (state) {
-    state.loggedIn = Boolean(isLoggedIn)
+  LOGIN(state) {
+    state.loggedIn = Boolean(isLoggedIn);
   },
-  LOGOUT (state) {
-    state.loggedIn = false
-    localStorage.removeItem('AUTH_TOKEN')
-    localStorage.removeItem('SERVICE')
+  LOGOUT(state) {
+    state.loggedIn = false;
+    localStorage.removeItem("AUTH_TOKEN");
+    localStorage.removeItem("SERVICE");
   }
-}
+};
 
 const actions = {
-  login ({ commit }) {
-    commit('LOGIN')
+  login({ commit }) {
+    commit("LOGIN");
   },
-  logout ({ commit }) {
-    commit('LOGOUT')
+  logout({ commit }) {
+    commit("LOGOUT");
   }
-}
+};
 
-function isLoggedIn () {
-  if (localStorage.getItem('AUTH_TOKEN')) {
-    return true
+function isLoggedIn() {
+  if (localStorage.getItem("AUTH_TOKEN")) {
+    return true;
   }
-  return false
+  return false;
 }
 
 export default {
@@ -34,4 +34,4 @@ export default {
   state,
   mutations,
   actions
-}
+};

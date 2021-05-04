@@ -133,11 +133,15 @@
         ></md-input>
       </md-field>
     </div>
+    <md-button class="md-accent" @click="initService"
+      >Restart Service Connection</md-button
+    >
   </div>
 </template>
 
 <script>
 import ibService from "../service/IbService";
+import alpacaService from "../service/AlpacaService";
 import confService from "../service/ConfService";
 
 export default {
@@ -152,7 +156,7 @@ export default {
       secretKey: String,
       paper: Boolean,
       dataService: String,
-      apiKey: String,
+      apiKey: String
     };
   },
   created() {
@@ -202,9 +206,16 @@ export default {
     setApiKey() {
       confService.setDataServiceConfiguration("apiKey", this.apiKey);
     },
+    initService() {
+      if (this.service === "IBKR") {
+        ibService.initialize();
+      } else if (this.service === "ALPACA") {
+        alpacaService.initialize();
+      }
+    }
   },
   mounted() {
     this.getAccounts();
-  },
+  }
 };
 </script>

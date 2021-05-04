@@ -1,7 +1,7 @@
-import AxiosService from '../service/AxiosService'
+import AxiosService from "../service/AxiosService";
 export default {
-    searchStockSymbol(symbol:string){
-/*     if (symbol.length >= 1) {
+  searchStockSymbol(symbol: string) {
+    /*     if (symbol.length >= 1) {
        var resp = await stockService.searchStockSymbol(symbol)
        if (symbol.length === 0) return
        if (resp.securities && Array.isArray(resp.securities.security)) {
@@ -16,5 +16,5 @@ export default {
        possibleSymbols = []
      } 
      return AxiosService.get(SEARCH_URL + '?q=' + symbol) */
-    }
-}
+  }
+};

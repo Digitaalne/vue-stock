@@ -10,21 +10,21 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState } from "vuex";
 export default {
-  name: 'Welcome',
+  name: "Welcome",
   computed: {
-    ...mapState('login', ['loggedIn'])
+    ...mapState("login", ["loggedIn"])
   },
   methods: {
-    redirect () {
+    redirect() {
       if (this.loggedIn) {
-        this.$router.push('/live')
+        this.$router.push("/live");
       }
     }
   },
-  mounted () {
-    this.redirect()
+  mounted() {
+    this.redirect();
   }
-}
+};
 </script>
