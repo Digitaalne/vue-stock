@@ -16,15 +16,12 @@
 </template>
 
 <script>
-import modal from "../Modal.vue";
 import Highcharts from "highcharts";
 import stockInit from "highcharts/modules/stock";
 stockInit(Highcharts);
 export default {
   props: ["name", "rangeSelect", "incData"],
-  components: {
-    modal,
-  },
+
   data() {
     return {
       stockOptions: {
