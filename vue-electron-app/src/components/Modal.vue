@@ -3,7 +3,14 @@
     <div class="modal-inside">
       <header class="modal-header">
         <slot name="header">
-          <md-button id="close" type="button" @click="close" aria-label="Close modal"> <md-icon>clear</md-icon></md-button>
+          <md-button
+            id="close"
+            type="button"
+            @click="close"
+            aria-label="Close modal"
+          >
+            <md-icon>clear</md-icon></md-button
+          >
         </slot>
       </header>
       <section class="modal-body">
@@ -15,13 +22,13 @@
 
 <script>
 export default {
-  name: 'modal',
+  name: "modal",
   methods: {
-    close () {
-      this.$emit('close')
+    close() {
+      this.$emit("close");
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -43,11 +50,11 @@ export default {
   overflow-x: auto;
   overflow-y: auto;
   display: flex;
-  padding:20px;
+  padding: 20px;
 }
-#close{
-flex:right;
-justify-content: right;
-display: flex;
+#close {
+  flex: right;
+  justify-content: right;
+  display: flex;
 }
 </style>

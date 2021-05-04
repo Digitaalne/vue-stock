@@ -1,41 +1,41 @@
-let favourites = []
-if (localStorage.getItem('favourites')) {
-  favourites = JSON.parse(localStorage.getItem('favourites'))
+let favourites = [];
+if (localStorage.getItem("favourites")) {
+  favourites = JSON.parse(localStorage.getItem("favourites"));
 }
 export default {
-  toggleFav (newFav) {
+  toggleFav(newFav) {
     if (!newFav) {
-      return
+      return;
     }
     if (this.isFav(newFav)) {
-      var indx = favourites.indexOf(newFav)
-      this.removeFav(indx)
+      const indx = favourites.indexOf(newFav);
+      this.removeFav(indx);
     } else {
-      this.addFav(newFav)
+      this.addFav(newFav);
     }
   },
-  addFav (newFav) {
+  addFav(newFav) {
     if (!newFav) {
-      return
+      return;
     }
-    favourites.push(newFav)
-    this.saveFav()
+    favourites.push(newFav);
+    this.saveFav();
   },
-  removeFav (x) {
-    favourites.splice(x, 1)
-    this.saveFav()
+  removeFav(x) {
+    favourites.splice(x, 1);
+    this.saveFav();
   },
-  saveFav () {
-    const json = JSON.stringify(favourites)
-    localStorage.setItem('favourites', json)
+  saveFav() {
+    const json = JSON.stringify(favourites);
+    localStorage.setItem("favourites", json);
   },
-  isFav (fav) {
-    return favourites.includes(fav)
+  isFav(fav) {
+    return favourites.includes(fav);
   },
-  getFavs () {
-    if (localStorage.getItem('favourites')) {
-      favourites = JSON.parse(localStorage.getItem('favourites'))
+  getFavs() {
+    if (localStorage.getItem("favourites")) {
+      favourites = JSON.parse(localStorage.getItem("favourites"));
     }
-    return favourites
+    return favourites;
   }
-}
+};

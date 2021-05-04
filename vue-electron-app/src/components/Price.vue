@@ -101,7 +101,7 @@
     </md-dialog>
   </div>
 </template>
-  
+
 <script>
 import paperService from "../service/PaperService";
 import favouriteService from "../service/FavouriteService.js";
@@ -126,21 +126,21 @@ export default {
           {
             type: "hour",
             count: 1,
-            text: "1h",
+            text: "1h"
           },
           {
             type: "day",
             count: 1,
-            text: "1D",
-          },
+            text: "1D"
+          }
         ],
         selected: 1,
-        inputEnabled: false,
-      },
+        inputEnabled: false
+      }
     };
   },
   methods: {
-    placeOrder: async function () {
+    placeOrder: async function() {
       if (this.validateInput()) {
         if (
           await paperService.placeOrder(
@@ -152,7 +152,7 @@ export default {
               type: this.type,
               side: this.side,
               time_in_force: this.time_in_force,
-              extended_hours: this.extended_hours,
+              extended_hours: this.extended_hours
             },
             this.data
           )
@@ -161,7 +161,7 @@ export default {
           this.$notify({
             group: "app",
             text: "Order successfully placed",
-            type: "success",
+            type: "success"
           });
         }
       }
@@ -181,7 +181,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Missing input",
-          type: "warn",
+          type: "warn"
         });
         return false;
       } else if (
@@ -191,7 +191,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Limit price is unassigned",
-          type: "warn",
+          type: "warn"
         });
         return false;
       } else if (
@@ -201,7 +201,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Stop price is unassigned",
-          type: "warn",
+          type: "warn"
         });
         return false;
       } else if (
@@ -213,7 +213,7 @@ export default {
           group: "app",
           text:
             "Extended hours only works with type limit and time in force is equal to day",
-          type: "warn",
+          type: "warn"
         });
         return false;
       }
@@ -229,7 +229,7 @@ export default {
     },
     closeChart() {
       this.$emit("closeChart", this.data);
-    },
-  },
+    }
+  }
 };
 </script>

@@ -1,7 +1,7 @@
-import {Contract} from '@stoqey/ib'
+import { Contract } from "@stoqey/ib";
 
 export interface StockMetadata {
-    lastUpdate: Date
-    contract: Contract
-    tickerId: number
-  }
+  lastUpdate: Date;
+  contract: Contract;
+  tickerId: number;
+}

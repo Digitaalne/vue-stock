@@ -16,36 +16,38 @@
         <md-table-head>Type</md-table-head>
       </md-table-row>
       <md-table-row v-for="activity in list" :key="activity.id">
-        <md-table-cell>{{activity.symbol}}</md-table-cell>
-        <md-table-cell>{{activity.activity_type}}</md-table-cell>
-        <md-table-cell>{{activity.cum_qty}}</md-table-cell>
-        <md-table-cell>{{activity.leaves_qty}}</md-table-cell>
-        <md-table-cell>{{activity.price}}</md-table-cell>
-        <md-table-cell>{{activity.qty}}</md-table-cell>
-        <md-table-cell>{{activity.side}}</md-table-cell>
-        <md-table-cell>{{new Date(activity.transaction_time).toLocaleString()}}</md-table-cell>
-        <md-table-cell>{{activity.type}}</md-table-cell>
+        <md-table-cell>{{ activity.symbol }}</md-table-cell>
+        <md-table-cell>{{ activity.activity_type }}</md-table-cell>
+        <md-table-cell>{{ activity.cum_qty }}</md-table-cell>
+        <md-table-cell>{{ activity.leaves_qty }}</md-table-cell>
+        <md-table-cell>{{ activity.price }}</md-table-cell>
+        <md-table-cell>{{ activity.qty }}</md-table-cell>
+        <md-table-cell>{{ activity.side }}</md-table-cell>
+        <md-table-cell>{{
+          new Date(activity.transaction_time).toLocaleString()
+        }}</md-table-cell>
+        <md-table-cell>{{ activity.type }}</md-table-cell>
       </md-table-row>
     </md-table>
   </div>
 </template>
 
 <script>
-import paperService from '../service/PaperService.js'
+import paperService from "../service/PaperService.js";
 export default {
-  name: 'TradeHistory',
-  data () {
+  name: "TradeHistory",
+  data() {
     return {
       list: null
-    }
+    };
   },
   methods: {
-    async loadData () {
-      this.list = await paperService.getActivitesList()
+    async loadData() {
+      this.list = await paperService.getActivitesList();
     }
   },
-  created () {
-    this.loadData()
+  created() {
+    this.loadData();
   }
-}
+};
 </script>
