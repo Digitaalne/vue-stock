@@ -144,11 +144,14 @@ export default {
     tf: string
   ) {
     console.log(symbol);
+    if(tf === "1D"){
+      tf = "1Day"
+    }
     const url = historicBarsUrl.replace("{symbol}", symbol);
     const bars = await AxiosService.get(url, {
       params: {
-        start: startDate,
-        end: endDate,
+        start: startDate.toISOString().split("T")[0],
+        end: endDate.toISOString().split("T")[0],
         timeframe: tf
       },
       headers: {
