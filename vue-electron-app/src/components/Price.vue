@@ -1,18 +1,30 @@
 <template>
   <div>
-    ask price: {{ data.askPrice }}
-    <br />
-    bid price: {{ data.bidPrice }}
-    <br />
-    last price: {{ data.lastPrice }}
-    <!-- -->
-    <md-button v-on:click="changeModalVisibility">BUY OR SELL</md-button>
-    <md-button @click="toggleFav()">
-      <span v-if="isFavourite"><md-icon>favorite</md-icon></span>
-      <span v-else><md-icon>favorite_border</md-icon></span>
-    </md-button>
-    <md-button v-on:click="closeChart"><md-icon>clear</md-icon></md-button>
-    <br />
+    <div>
+      <div v-if="data.askPrice !== undefined" class="price">
+        ask price: {{ data.askPrice }}
+      </div>
+      <br />
+      <div v-if="data.bidPrice !== undefined" class="price">
+        bid price: {{ data.bidPrice }}
+      </div>
+      <br />
+      <div v-if="data.lastPrice !== undefined" class="price">
+        last price: {{ data.lastPrice }}
+      </div>
+    </div>
+    <div class="stock-menu">
+      <md-button @click="toggleFav()">
+        <span v-if="isFavourite"><md-icon>favorite</md-icon></span>
+        <span v-else><md-icon>favorite_border</md-icon></span>
+      </md-button>
+      <md-button class="md-accent" v-on:click="closeChart"
+        ><md-icon>clear</md-icon></md-button
+      >
+      <md-button class="md-primary md-raised" v-on:click="changeModalVisibility"
+        >BUY OR SELL</md-button
+      >
+    </div>
     <chart
       v-bind:name="name"
       v-bind:incData="this.incData"
@@ -126,21 +138,21 @@ export default {
           {
             type: "hour",
             count: 1,
-            text: "1h"
+            text: "1h",
           },
           {
             type: "day",
             count: 1,
-            text: "1D"
-          }
+            text: "1D",
+          },
         ],
         selected: 1,
-        inputEnabled: false
-      }
+        inputEnabled: false,
+      },
     };
   },
   methods: {
-    placeOrder: async function() {
+    placeOrder: async function () {
       if (this.validateInput()) {
         if (
           await paperService.placeOrder(
@@ -152,7 +164,7 @@ export default {
               type: this.type,
               side: this.side,
               time_in_force: this.time_in_force,
-              extended_hours: this.extended_hours
+              extended_hours: this.extended_hours,
             },
             this.data
           )
@@ -161,7 +173,7 @@ export default {
           this.$notify({
             group: "app",
             text: "Order successfully placed",
-            type: "success"
+            type: "success",
           });
         }
       }
@@ -181,7 +193,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Missing input",
-          type: "warn"
+          type: "warn",
         });
         return false;
       } else if (
@@ -191,7 +203,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Limit price is unassigned",
-          type: "warn"
+          type: "warn",
         });
         return false;
       } else if (
@@ -201,7 +213,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Stop price is unassigned",
-          type: "warn"
+          type: "warn",
         });
         return false;
       } else if (
@@ -213,7 +225,7 @@ export default {
           group: "app",
           text:
             "Extended hours only works with type limit and time in force is equal to day",
-          type: "warn"
+          type: "warn",
         });
         return false;
       }
@@ -229,7 +241,31 @@ export default {
     },
     closeChart() {
       this.$emit("closeChart", this.data);
-    }
-  }
+    },
+  },
 };
 </script>
+
+<style lang="scss" scoped>
+.price {
+  height: auto;
+  width: 13em;
+  padding: 15px 15px 15px 15px;
+  margin: 0 0 0 5%;
+  display: block;
+  background: #ffffff;
+  font-size: 1.5em;
+  color: #000000;
+  border-top: 0px;
+  border-left: 0px;
+  border-right: 1px;
+  border-bottom: 1px;
+  border-color: #000000;
+  border-style: solid;
+  box-shadow: 1px 1px 6px 0px #000000;
+  -webkit-box-shadow: 1px 1px 6px 0px #000000;
+}
+.stock-menu {
+  margin: 1% 0 0 5%;
+}
+</style>

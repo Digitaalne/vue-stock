@@ -50,92 +50,101 @@
         </md-card>
       </div>
     </div>
-    <div v-if="service !== undefined">
-      <md-radio
-        v-if="service === 'IBKR'"
-        id="dataService"
-        name="dataServices"
-        v-model="dataService"
-        :value="'IBKR'"
-        @change="setDataService"
-        >IBKR</md-radio
-      >
-      <md-radio
-        v-if="service === 'ALPACA'"
-        id="dataService"
-        name="dataServices"
-        v-model="dataService"
-        :value="'ALPACA'"
-        @change="setDataService"
-        >ALPACA</md-radio
-      >
-      <md-radio
-        id="dataService"
-        name="dataServices"
-        v-model="dataService"
-        :value="'FMP'"
-        @change="setDataService"
-        >FMP</md-radio
-      >
-    </div>
-    <div id="ibkr" v-if="service === 'IBKR'">
-      <md-field>
-        <label for="ibkr-port">IBKR API Port:</label>
-        <md-input
-          type="number"
-          id="ibkr-port"
-          v-model="port"
-          v-debounce:300ms="setPort"
-        ></md-input>
-      </md-field>
-      <div class="md-layout-item">
-        Choose your account <br />
+    <div id="jobo">
+      <div v-if="service !== undefined">
+        <div id="data-service-header" class="md-subheading">
+          Choose data service:
+          <md-tooltip md-direction="right"
+            >Service where stock information (prices & etc...) comes
+            from.</md-tooltip
+          >
+        </div>
         <md-radio
-          id="accounts"
-          name="accounts"
-          v-model="account"
-          v-for="acc in accounts"
-          :key="acc"
-          :value="acc"
-          @change="setAccount"
-          >{{ acc }}</md-radio
+          v-if="service === 'IBKR'"
+          id="dataService"
+          name="dataServices"
+          v-model="dataService"
+          :value="'IBKR'"
+          @change="setDataService"
+          >IBKR</md-radio
+        >
+        <md-radio
+          v-if="service === 'ALPACA'"
+          id="dataService"
+          name="dataServices"
+          v-model="dataService"
+          :value="'ALPACA'"
+          @change="setDataService"
+          >ALPACA</md-radio
+        >
+        <md-radio
+          id="dataService"
+          name="dataServices"
+          v-model="dataService"
+          :value="'FMP'"
+          @change="setDataService"
+          >FMP</md-radio
         >
       </div>
-    </div>
-    <div id="alpaca" v-if="service === 'ALPACA'">
-      <md-field>
-        <label for="alpaca-key">Alpaca Key Id:</label>
-        <md-input
-          id="alpaca-key"
-          v-model="keyId"
-          v-debounce:300ms="setKeyId"
-        ></md-input>
-      </md-field>
-      <md-field>
-        <label for="alpaca-secret">Alpaca Secret Key:</label>
-        <md-input
-          id="alpaca-secret"
-          v-model="secretKey"
-          v-debounce:300ms="setSecretKey"
-        ></md-input>
-      </md-field>
-      <md-switch id="alpaca-paper" v-model="paper" @change="setPaper"
-        >Use paper account</md-switch
+      <div id="ibkr" v-if="service === 'IBKR'">
+        <md-field>
+          <label for="ibkr-port">IBKR API Port:</label>
+          <md-input
+            type="number"
+            id="ibkr-port"
+            v-model="port"
+            v-debounce:300ms="setPort"
+          ></md-input>
+        </md-field>
+        <div class="md-layout-item">
+          Choose your account <br />
+          <md-radio
+            id="accounts"
+            name="accounts"
+            v-model="account"
+            v-for="acc in accounts"
+            :key="acc"
+            :value="acc"
+            @change="setAccount"
+            >{{ acc }}</md-radio
+          >
+        </div>
+      </div>
+      <div id="alpaca" v-if="service === 'ALPACA'">
+        <md-field>
+          <label for="alpaca-key">Alpaca Key Id:</label>
+          <md-input
+            id="alpaca-key"
+            v-model="keyId"
+            v-debounce:300ms="setKeyId"
+          ></md-input>
+        </md-field>
+        <md-field>
+          <label for="alpaca-secret">Alpaca Secret Key:</label>
+          <md-input
+            id="alpaca-secret"
+            v-model="secretKey"
+            v-debounce:300ms="setSecretKey"
+          ></md-input>
+        </md-field>
+        <md-switch id="alpaca-paper" v-model="paper" @change="setPaper"
+          >Use paper account</md-switch
+        >
+      </div>
+      <div v-if="dataService === 'FMP'">
+        <md-field>
+          <label for="ibkr-port">FMP api key:</label>
+          <md-input
+            id="fmp-apikey"
+            v-model="apiKey"
+            v-debounce:300ms="setApiKey"
+          ></md-input>
+        </md-field>
+      </div>
+      <md-button class="md-accent" @click="initService"
+        >Restart Service Connection</md-button
       >
     </div>
-    <div v-if="dataService === 'FMP'">
-      <md-field>
-        <label for="ibkr-port">FMP api key:</label>
-        <md-input
-          id="fmp-apikey"
-          v-model="apiKey"
-          v-debounce:300ms="setApiKey"
-        ></md-input>
-      </md-field>
-    </div>
-    <md-button class="md-accent" @click="initService"
-      >Restart Service Connection</md-button
-    >
   </div>
 </template>
 
@@ -156,7 +165,7 @@ export default {
       secretKey: String,
       paper: Boolean,
       dataService: String,
-      apiKey: String
+      apiKey: String,
     };
   },
   created() {
@@ -212,10 +221,19 @@ export default {
       } else if (this.service === "ALPACA") {
         alpacaService.initialize();
       }
-    }
+    },
   },
   mounted() {
     this.getAccounts();
-  }
+  },
 };
 </script>
+
+<style lang="scss" scoped>
+#jobo {
+  margin: 0 5% 0 5%;
+}
+#data-service-header {
+  padding: 15px 15px 5px 0;
+}
+</style>
