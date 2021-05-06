@@ -4,6 +4,15 @@ import confService from "../service/ConfService";
 import fmpService from "./FmpService";
 
 export default {
+  /**
+   * Return stock price information in history
+   * 
+   * @param {*} startDate first date of range
+   * @param {*} endDate second date of range
+   * @param {*} stock requested stock
+   * @param {*} tf bar timeframe
+   * @returns 
+   */
   async getHistoricStockInformation(startDate, endDate, stock, tf) {
     const activeService = confService.getActiveDataService();
     if (activeService === "IBKR") {
@@ -20,6 +29,10 @@ export default {
     }
   },
 
+  /**
+   * Subscribe stock price information as bar
+   * @param {} stock requested stock
+   */
   async getStockInformation(stock) {
     const activeService = confService.getActiveDataService();
     if (activeService === "IBKR") {
@@ -30,6 +43,11 @@ export default {
       fmpService.getRealTimeBars(stock.symbol);
     }
   },
+  /**
+   * Search possible securities for user. Request it from service and map it to corresponding data format.
+   * @param {*} symbol requested security
+   * @returns list of possible securities
+   */
   async searchStockSymbol(symbol) {
     const activeService = confService.getActiveDataService();
     if (activeService === "IBKR") {
@@ -37,7 +55,7 @@ export default {
         let stocks = await ibService.searchStockSymbol(symbol);
         stocks = stocks.slice(0, 10);
         const resp = [];
-        for (var i = 0; i < stocks.length; i++) {
+        for (let i = 0; i < stocks.length; i++) {
           const mappedStock = {};
           mappedStock.symbol = stocks[i].contract.symbol;
           mappedStock.description =
@@ -50,10 +68,9 @@ export default {
     } else if (activeService === "ALPACA") {
       return alpacaService.searchStockSymbol(symbol);
     } else if (activeService === "FMP") {
-      console.log("YAAS");
       const symbols = await fmpService.searchStockSymbol(symbol);
       const resp = [];
-      for (var i = 0; i < symbols.length; i++) {
+      for (let i = 0; i < symbols.length; i++) {
         const mappedStock = {};
         mappedStock.symbol = symbols[i].symbol;
         mappedStock.description =
@@ -65,6 +82,11 @@ export default {
 
     return;
   },
+  /**
+   * Cancel security information subscription
+   * 
+   * @param {*} data for cancellation
+   */
   cancelSubscription(data) {
     console.log(data);
     const activeService = confService.getActiveDataService();

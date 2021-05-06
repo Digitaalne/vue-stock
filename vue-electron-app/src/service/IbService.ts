@@ -26,6 +26,12 @@ const BARS_STORE_NAME = "socketModule";
 const PRICE_STORE_NAME = "prices";
 let ib: IBApi;
 
+const pricesDict = new Map<number, PriceInterface>();
+const tickers = new Map<number, StockMetadata>();
+
+/**
+ * Initialize IB service and communication with IB gateway
+ */
 function init() {
   const portString = confService.getServiceConfiguration("port");
   ib = new IBApi({
@@ -43,13 +49,16 @@ function init() {
   });
 }
 
-const pricesDict = new Map<number, PriceInterface>();
-const tickers = new Map<number, StockMetadata>();
 
-if (confService.getActiveService() === "IBKR") {
-  init();
-}
-
+/**
+ * Map incoming IB data format to position format.
+ * 
+ * @param contract position contract
+ * @param pos user's position
+ * @param avgCost average cost of security
+ * @param account position's account
+ * @returns Position object
+ */
 function mapToPosition(
   contract: Contract,
   pos: number,
@@ -66,6 +75,11 @@ function mapToPosition(
   };
 }
 
+/**
+ * If enough time is passed then map stored information to chart supported format and dispatch it to store.
+ * 
+ * @param id security request id
+ */
 function mapToChartFormat(id: number) {
   const metadata = tickers.get(id);
   const comparableTime = new Date(metadata?.lastUpdate!);
@@ -80,8 +94,8 @@ function mapToChartFormat(id: number) {
       const high = Math.max(...lastPriceList);
       const low = Math.min(...lastPriceList);
       const date = new Date().getTime();
-      const ab = [date, open, high, low, close];
-      const cd = [date, 0];
+      const stock_list = [date, open, high, low, close];
+      const volume_list = [date, 0];
 
       const obj = {};
       Object.assign(obj, tickers.get(id));
@@ -91,8 +105,8 @@ function mapToChartFormat(id: number) {
       store.dispatch(BARS_STORE_NAME + "/socketOnmessage", {
         data: JSON.stringify({
           [metadata?.contract.symbol!]: {
-            stock_data_list: [ab],
-            stock_volume_list: [cd],
+            stock_data_list: [stock_list],
+            stock_volume_list: [volume_list],
             metadata: obj
           }
         })
@@ -101,7 +115,16 @@ function mapToChartFormat(id: number) {
   }
 }
 
+if (confService.getActiveService() === "IBKR") {
+  init();
+}
+
 export default {
+  /**
+   * get all user's positions
+   * 
+   * @returns promise that returns user's positions
+   */
   async getPosition() {
     const prom = new Promise(function(resolve, reject) {
       const posList: Position[] = [];
@@ -123,6 +146,11 @@ export default {
     ib.reqPositions();
     return prom;
   },
+  /**
+   * Get information for candlestick bars for wanted contract.
+   * 
+   * @param contract findable contract
+   */
   getRealTimeBars(contract: Contract) {
     contract.exchange = "SMART";
     ib.reqMarketDataType(4);
@@ -153,6 +181,9 @@ export default {
 
       store.dispatch(PRICE_STORE_NAME + "/update", price2);
     });
+    /**
+     * On incoming ticks store information to current security map
+     */
     ib.on(
       EventName.tickPrice,
       (tickerId: number, field: TickType, value: number, attribs: unknown) => {
@@ -185,6 +216,12 @@ export default {
     );
     ib.reqIds();
   },
+  /**
+   * Search possible suitable securties for current user input
+   * 
+   * @param pattern user text input
+   * @returns list of possible securities
+   */
   searchStockSymbol(pattern: string) {
     const prom = new Promise(function(resolve, reject) {
       ib.once(EventName.nextValidId, (id: number) => {
@@ -200,6 +237,13 @@ export default {
     ib.reqIds();
     return prom;
   },
+  /**
+   * Place order for security.
+   * 
+   * @param input user's options for order
+   * @param contract contract for order
+   * @returns -
+   */
   placeOrder(input: any, contract: Contract) {
     console.log("placed contract ");
     console.log(contract);
@@ -233,7 +277,7 @@ export default {
     order.lmtPrice = input.limit_price;
     order.auxPrice = input.stop_price;
     order.tif = input.time_in_force;
-    const account = localStorage.getItem("ACCOUNT");
+    const account = confService.getServiceConfiguration("account")
     if (account == null) {
       notificationService.notify({
         group: "app",
@@ -265,6 +309,11 @@ export default {
 
     ib.reqIds();
   },
+  /**
+   * Get list of all possible accounts
+   * 
+   * @returns promise of list of accounts
+   */
   getAllAccounts() {
     const prom = new Promise(function(resolve, reject) {
       ib.on(EventName.managedAccounts, (accountsList: string) => {
@@ -274,6 +323,11 @@ export default {
     ib.reqManagedAccts();
     return prom;
   },
+  /**
+   * Get execution history
+   * 
+   * @returns promise of list of history
+   */
   getOrderHistory() {
     const response: History[] = [];
     const prom = new Promise(function(resolve, reject) {
@@ -300,10 +354,17 @@ export default {
     ib.reqIds();
     return prom;
   },
+  /**
+   * Cancel security information subscription
+   * @param data security information
+   */
   cancelSubscription(data: any) {
     store.dispatch(PRICE_STORE_NAME + "/delete", data.metadata.contract.symbol);
     ib.cancelMktData(data.metadata.tickerId);
   },
+  /**
+   * call out IB gateway connection initialization
+   */
   initialize() {
     init();
   }
