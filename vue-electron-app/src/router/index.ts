@@ -6,8 +6,8 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
   {
     path: "/",
-    name: "landing-page",
-    component: require("@/views/Welcome").default
+    name: "services",
+    component: require("@/views/ChooseService").default
   },
   {
     path: "/live",
@@ -28,11 +28,6 @@ const routes: Array<RouteConfig> = [
     path: "/history",
     name: "trade history",
     component: require("@/views/TradeHistory").default
-  },
-  {
-    path: "/service",
-    name: "services",
-    component: require("@/views/ChooseService").default
   },
   {
     path: "*",

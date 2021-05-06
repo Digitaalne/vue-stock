@@ -9,7 +9,6 @@ import {
   ErrorCode,
   Execution,
   ContractDescription,
-  SecType,
   TickType,
   Order,
   OrderAction,
@@ -17,7 +16,7 @@ import {
   OrderState
 } from "@stoqey/ib";
 import store from "../store/index";
-import { PriceInterface2 } from "@/interfaces/PriceInterface2";
+import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle";
 import confService from "../service/ConfService";
 import notificationService from "./NotificationService";
 
@@ -73,13 +72,9 @@ function mapToChartFormat(id: number) {
   comparableTime.setSeconds(
     metadata!.lastUpdate.getSeconds() + CANDLESTICK_SECONDS
   );
-  console.log(comparableTime);
-  console.log(new Date());
   if (new Date() > comparableTime) {
-    console.log("inside if");
     const lastPriceList = pricesDict.get(id)?.lastPrice;
     if (lastPriceList != undefined && lastPriceList.length > 0) {
-      console.log("inside second if");
       const open = lastPriceList[0];
       const close = lastPriceList[lastPriceList.length - 1];
       const high = Math.max(...lastPriceList);
@@ -90,7 +85,7 @@ function mapToChartFormat(id: number) {
 
       const obj = {};
       Object.assign(obj, tickers.get(id));
-      tickers.get(id)!.lastUpdate = new Date(); //SEE RIDA VIGANE
+      tickers.get(id)!.lastUpdate = new Date(); //Issue #24 bug
       pricesDict.get(id)!.lastPrice = [];
 
       store.dispatch(BARS_STORE_NAME + "/socketOnmessage", {
@@ -129,12 +124,10 @@ export default {
     return prom;
   },
   getRealTimeBars(contract: Contract) {
-    //contract.exchange = contract.primaryExch
     contract.exchange = "SMART";
     ib.reqMarketDataType(4);
     console.log(contract);
     ib.once(EventName.nextValidId, (id: number) => {
-      //ib.reqRealTimeBars(id, contract, 1, 'TRADES', false)
       ib.reqMktData(id, contract, "", false, false);
 
       const metadata: StockMetadata = {
@@ -160,32 +153,6 @@ export default {
 
       store.dispatch(PRICE_STORE_NAME + "/update", price2);
     });
-
-    ib.on(
-      EventName.realtimeBar,
-      (
-        reqId: number,
-        date: number,
-        open: number,
-        high: number,
-        low: number,
-        close: number,
-        volume: number,
-        WAP: number,
-        count: number
-      ) => {
-        const ab = [date, open, high, low, close];
-        const cd = [date, volume];
-        store.dispatch(BARS_STORE_NAME + "/socketOnmessage", {
-          data: JSON.stringify({
-            [contract.symbol!]: {
-              stock_data_list: [ab],
-              stock_volume_list: [cd]
-            }
-          })
-        });
-      }
-    );
     ib.on(
       EventName.tickPrice,
       (tickerId: number, field: TickType, value: number, attribs: unknown) => {
@@ -216,78 +183,6 @@ export default {
         }
       }
     );
-    ib.on(
-      EventName.tickSize,
-      (tickerId: number, field: TickType, value: number) => {
-        const tickList = pricesDict.get(tickerId);
-        if (TickType.RT_TRD_VOLUME === field) {
-          tickList?.volume.push(value);
-          console.log("RTD " + value);
-        }
-      }
-    );
-    ib.reqIds();
-  },
-  getHistoricalData(
-    contract: Contract,
-    endDateTime: string,
-    duration: string,
-    timeframe: string
-  ) {
-    const cont: Contract = new Object();
-    cont.conId = 36285627;
-    cont.currency = "USD";
-    cont.secType = SecType.STK;
-    cont.symbol = "GME";
-    cont.exchange = "NYSE";
-
-    const wafa = [];
-    const pafa = [];
-    ib.once(EventName.nextValidId, (id: number) => {
-      ib.reqHistoricalData(
-        id,
-        cont,
-        endDateTime,
-        duration,
-        timeframe,
-        "TRADES",
-        0,
-        2,
-        false
-      );
-    });
-    ib.on(
-      EventName.historicalData,
-      (
-        reqId: number,
-        time: string,
-        open: number,
-        high: number,
-        low: number,
-        close: number,
-        volume: number,
-        count: number,
-        WAP: number,
-        hasGaps: boolean | undefined
-      ) => {
-        const ab = [time, open, high, low, close];
-        const cd = [time, volume];
-        console.log(ab);
-        console.log(cd);
-        wafa.push(ab);
-        pafa.push(cd);
-      }
-    );
-    ib.on(
-      EventName.historicalDataEnd,
-      (regId: number, start: string, end: string) => {
-        ib.cancelHistoricalData(regId);
-        console.log(wafa);
-        console.log(pafa);
-        return { wafa, pafa };
-      }
-    );
-
     ib.reqIds();
   },
   searchStockSymbol(pattern: string) {
@@ -365,18 +260,6 @@ export default {
           type: "info"
         });
         console.log("status " + orderState.status);
-      }
-    );
-    ib.on(
-      EventName.orderStatus,
-      (
-        orderId: number,
-        apiClientId: number,
-        apiOrderId: number,
-        whyHeld: string,
-        mktCapPrice: number
-      ) => {
-        console.log("oid " + orderId);
       }
     );
 
