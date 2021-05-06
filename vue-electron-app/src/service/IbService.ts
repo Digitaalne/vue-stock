@@ -9,7 +9,6 @@ import {
   ErrorCode,
   Execution,
   ContractDescription,
-  SecType,
   TickType,
   Order,
   OrderAction,
