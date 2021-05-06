@@ -1,9 +1,17 @@
 import axiosService from "./AxiosService.js";
-import confService from "../service/ConfService";
-const fmpHistoricalUrl = "https://fmpcloud.io/api/v3/historical-chart/";
-const fmpHistoricalDayUrl = "https://fmpcloud.io/api/v3/historical-price-full/";
-const fmpTickerSearchUrl = "https://fmpcloud.io/api/v3/search";
-const fmpStockNewsUrl = "https://fmpcloud.io/api/v3/stock_news";
+import confService from "../service/ConfService";import store from "../store/index";
+import { PriceInterface2 } from "@/interfaces/PriceInterface2.js";
+const FMP_HISTORICAL_URL = "https://fmpcloud.io/api/v3/historical-chart/";
+const FMP_HISTORICAL_DAY_URL = "https://fmpcloud.io/api/v3/historical-price-full/";
+const FMP_TICKER_SEARCH_URL = "https://fmpcloud.io/api/v3/search";
+const FMP_STOCK_NEWS_URL = "https://fmpcloud.io/api/v3/stock_news";
+const FMP_STOCK_QUOTE_URL = "https://fmpcloud.io/api/v3/quote/"
+const STOCK_PRICE_COUNT = 15;
+const SOCKET_STORE_NAME = "socketModule";
+const PRICE_STORE_NAME = "prices";
+const pricesDict = new Map<string, Array<number>>();
+const intervalDict = new Map<string, NodeJS.Timeout>();
+
 function convertTimeframe(timeframe: string) {
   if (timeframe === "1Min") {
     return "1min";
@@ -31,7 +39,7 @@ function buildHistoricalDataUrl(
   const endDateString = endDate.toISOString().split("T")[0];
   if (timeframe !== "1day") {
     return (
-      fmpHistoricalUrl +
+      FMP_HISTORICAL_URL +
       timeframe +
       "/" +
       symbol +
@@ -45,7 +53,7 @@ function buildHistoricalDataUrl(
     );
   } else {
     return (
-      fmpHistoricalDayUrl +
+      FMP_HISTORICAL_DAY_URL +
       symbol +
       "?" +
       "from=" +
@@ -57,6 +65,36 @@ function buildHistoricalDataUrl(
     );
   }
 }
+async function getRealtimeThingies2(url:string){
+  let data = await axiosService.get(url);
+  console.log("FMP2", data[0])
+  pricesDict.get(data[0].symbol)?.push(data[0].price)
+  getRealtimeThingies3(data[0].symbol)
+}
+
+function getRealtimeThingies3(stock:string){
+  let priceList = pricesDict.get(stock)!
+  console.log("FMP2.5", stock)
+  console.log("FMP2.6", pricesDict)
+  if(priceList.length>=STOCK_PRICE_COUNT){
+    console.log("FMP3")
+    const open = priceList[0];
+    const close = priceList[priceList.length - 1];
+    const high = Math.max(...priceList);
+    const low = Math.min(...priceList);
+    const date = new Date().getTime();
+    pricesDict.set(stock, [])
+    store.dispatch(SOCKET_STORE_NAME + "/socketOnmessage", {
+      data: JSON.stringify({
+        [stock]: {
+          stock_data_list: [[date, open, high, low, close]],
+          stock_volume_list: [[date, 0]],
+        }
+      })
+    });
+  }
+}
+
 export default {
   async getHistoricalData(
     startDate: Date,
@@ -89,7 +127,7 @@ export default {
   },
   searchStockSymbol(stock: string) {
     const url =
-      fmpTickerSearchUrl +
+      FMP_TICKER_SEARCH_URL +
       "?query=" +
       stock +
       "&limit=10&apikey=" +
@@ -98,7 +136,23 @@ export default {
   },
   getStockNews(stock: string) {
     const url =
-      fmpStockNewsUrl + "?tickers=" + stock + "&limit=10&apikey=" + getApiKey();
+      FMP_STOCK_NEWS_URL + "?tickers=" + stock + "&limit=10&apikey=" + getApiKey();
     return axiosService.get(url);
-  }
+  },
+  
+  getRealTimeBars(stock: string){
+      const url = FMP_STOCK_QUOTE_URL+stock+"?apikey="+getApiKey()
+      console.log("1FMP", url)
+      pricesDict.set(stock.toUpperCase(), [])
+      intervalDict.set(stock.toUpperCase(), setInterval(getRealtimeThingies2.bind(null, url), 1000)) 
+      const price2: PriceInterface2 = {
+        name: stock
+      };
+      store.dispatch(PRICE_STORE_NAME + "/update", price2);
+  },
+  cancelSubscription(stock: string) {
+    clearInterval(intervalDict.get(stock)!)
+    store.dispatch(PRICE_STORE_NAME + "/delete", stock);
+  },
+ 
 };

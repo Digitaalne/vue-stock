@@ -23,8 +23,8 @@ import notificationService from "./NotificationService";
 
 const CANDLESTICK_SECONDS = 60;
 
-const barsStoreName = "socketModule";
-const priceStoreName = "prices";
+const BARS_STORE_NAME = "socketModule";
+const PRICE_STORE_NAME = "prices";
 let ib: IBApi;
 
 function init() {
@@ -93,7 +93,7 @@ function mapToChartFormat(id: number) {
       tickers.get(id)!.lastUpdate = new Date(); //SEE RIDA VIGANE
       pricesDict.get(id)!.lastPrice = [];
 
-      store.dispatch(barsStoreName + "/socketOnmessage", {
+      store.dispatch(BARS_STORE_NAME + "/socketOnmessage", {
         data: JSON.stringify({
           [metadata?.contract.symbol!]: {
             stock_data_list: [ab],
@@ -158,7 +158,7 @@ export default {
         metadata: metadata
       };
 
-      store.dispatch(priceStoreName + "/update", price2);
+      store.dispatch(PRICE_STORE_NAME + "/update", price2);
     });
 
     ib.on(
@@ -176,7 +176,7 @@ export default {
       ) => {
         const ab = [date, open, high, low, close];
         const cd = [date, volume];
-        store.dispatch(barsStoreName + "/socketOnmessage", {
+        store.dispatch(BARS_STORE_NAME + "/socketOnmessage", {
           data: JSON.stringify({
             [contract.symbol!]: {
               stock_data_list: [ab],
@@ -196,14 +196,14 @@ export default {
             askPrice: value,
             name: tickers.get(tickerId)?.contract.symbol!
           };
-          store.dispatch(priceStoreName + "/update", price);
+          store.dispatch(PRICE_STORE_NAME + "/update", price);
         } else if (TickType.BID === field || TickType.DELAYED_BID === field) {
           tickList?.bidPrice.push(value);
           const price: PriceInterface2 = {
             bidPrice: value,
             name: tickers.get(tickerId)?.contract.symbol!
           };
-          store.dispatch(priceStoreName + "/update", price);
+          store.dispatch(PRICE_STORE_NAME + "/update", price);
         } else if (TickType.DELAYED_LAST === field || TickType.LAST === field) {
           console.log("push " + tickerId);
           tickList?.lastPrice.push(value);
@@ -211,7 +211,7 @@ export default {
             lastPrice: value,
             name: tickers.get(tickerId)?.contract.symbol!
           };
-          store.dispatch(priceStoreName + "/update", price);
+          store.dispatch(PRICE_STORE_NAME + "/update", price);
           mapToChartFormat(tickerId);
         }
       }
@@ -418,7 +418,7 @@ export default {
     return prom;
   },
   cancelSubscription(data: any) {
-    store.dispatch(priceStoreName + "/delete", data.metadata.contract.symbol);
+    store.dispatch(PRICE_STORE_NAME + "/delete", data.metadata.contract.symbol);
     ib.cancelMktData(data.metadata.tickerId);
   },
   initialize() {

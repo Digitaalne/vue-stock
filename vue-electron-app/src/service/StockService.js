@@ -26,6 +26,8 @@ export default {
       ibService.getRealTimeBars(stock.contract);
     } else if (activeService === "ALPACA") {
       alpacaService.getRealTimeBars(stock.symbol);
+    } else if (activeService === "FMP") {
+      fmpService.getRealTimeBars(stock.symbol);
     }
   },
   async searchStockSymbol(symbol) {
@@ -70,6 +72,8 @@ export default {
       ibService.cancelSubscription(data);
     } else if (activeService === "ALPACA") {
       alpacaService.cancelSubscription(data.name);
-    }
+    } else if (activeService === "FMP") {
+    fmpService.cancelSubscription(data.name);
+  }
   }
 };
