@@ -7,10 +7,10 @@ import { PriceInterface2 } from "@/interfaces/PriceInterface2";
 import AxiosService from "./AxiosService";
 import notificationService from "./NotificationService";
 
-const socketStoreName = "socketModule";
-const priceStoreName = "prices";
+const SOCKET_STORE_NAME = "socketModule";
+const PRICE_STORE_NAME = "prices";
 const Alpaca = require("@alpacahq/alpaca-trade-api");
-const historicBarsUrl = "https://data.alpaca.markets/v2/stocks/{symbol}/bars";
+const HISTORIC_BARS_URL = "https://data.alpaca.markets/v2/stocks/{symbol}/bars";
 let alpaca: any;
 let socket: WebSocket;
 
@@ -77,7 +77,7 @@ function init() {
             eventObject[i].c
           ]);
           resp.stock_volume_list.push([time, eventObject[i].v]);
-          store.dispatch(socketStoreName + "/" + "socketOnmessage", {
+          store.dispatch(SOCKET_STORE_NAME + "/" + "socketOnmessage", {
             data: JSON.stringify({ [resp.name]: resp })
           });
         } else if (eventObject[i].T === "error") {
@@ -134,7 +134,7 @@ export default {
     const price2: PriceInterface2 = {
       name: stockCode
     };
-    store.dispatch(priceStoreName + "/update", price2);
+    store.dispatch(PRICE_STORE_NAME + "/update", price2);
   },
 
   async getHistoricalData(
@@ -147,7 +147,7 @@ export default {
     if(tf === "1D"){
       tf = "1Day"
     }
-    const url = historicBarsUrl.replace("{symbol}", symbol);
+    const url = HISTORIC_BARS_URL.replace("{symbol}", symbol);
     const bars = await AxiosService.get(url, {
       params: {
         start: startDate.toISOString().split("T")[0],
@@ -205,7 +205,7 @@ export default {
       bars: [stockCode]
     };
     socket.send(JSON.stringify(cancelSubscription));
-    store.dispatch(priceStoreName + "/delete", stockCode);
+    store.dispatch(PRICE_STORE_NAME + "/delete", stockCode);
   },
 
   searchStockSymbol(symbol: string) {
