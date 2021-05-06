@@ -1,9 +1,8 @@
 import { Position } from "@/interfaces/Position";
-import TradierService from "../service/TradierService";
 import confService from "../service/ConfService";
 import { History } from "@/interfaces/History";
 import store from "../store/index";
-import { PriceInterface2 } from "@/interfaces/PriceInterface2";
+import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle";
 import AxiosService from "./AxiosService";
 import notificationService from "./NotificationService";
 
@@ -20,7 +19,6 @@ let configPaper: string;
 
 function init() {
   try {
-    console.log("ALPACA INIT");
     configKeyId = confService.getServiceConfiguration("keyId");
     configSecretKey = confService.getServiceConfiguration("secretKey");
     configPaper = confService.getServiceConfiguration("paper");
@@ -46,7 +44,6 @@ function init() {
       socket = new WebSocket("wss://stream.data.alpaca.markets/v2/iex");
     }
     socket.onopen = function(event: any) {
-      console.log("opened");
       socket.send(JSON.stringify(authObject));
     };
     socket.onclose = function(event: any) {
@@ -55,7 +52,6 @@ function init() {
         text: "Alpaca socket closed",
         type: "warn"
       });
-      console.log("closed");
     };
 
     socket.onmessage = function(event: any) {
@@ -206,11 +202,6 @@ export default {
     };
     socket.send(JSON.stringify(cancelSubscription));
     store.dispatch(PRICE_STORE_NAME + "/delete", stockCode);
-  },
-
-  searchStockSymbol(symbol: string) {
-    return TradierService.searchStockSymbol(symbol);
-    //return symbol
   },
   initialize() {
     init();

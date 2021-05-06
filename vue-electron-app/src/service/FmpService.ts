@@ -1,6 +1,6 @@
 import axiosService from "./AxiosService.js";
 import confService from "../service/ConfService";import store from "../store/index";
-import { PriceInterface2 } from "@/interfaces/PriceInterface2.js";
+import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle.js";
 const FMP_HISTORICAL_URL = "https://fmpcloud.io/api/v3/historical-chart/";
 const FMP_HISTORICAL_DAY_URL = "https://fmpcloud.io/api/v3/historical-price-full/";
 const FMP_TICKER_SEARCH_URL = "https://fmpcloud.io/api/v3/search";
@@ -65,19 +65,15 @@ function buildHistoricalDataUrl(
     );
   }
 }
-async function getRealtimeThingies2(url:string){
+async function pullStock(url:string){
   let data = await axiosService.get(url);
-  console.log("FMP2", data[0])
   pricesDict.get(data[0].symbol)?.push(data[0].price)
-  getRealtimeThingies3(data[0].symbol)
+  dispatchDataToStore(data[0].symbol)
 }
 
-function getRealtimeThingies3(stock:string){
+function dispatchDataToStore(stock:string){
   let priceList = pricesDict.get(stock)!
-  console.log("FMP2.5", stock)
-  console.log("FMP2.6", pricesDict)
   if(priceList.length>=STOCK_PRICE_COUNT){
-    console.log("FMP3")
     const open = priceList[0];
     const close = priceList[priceList.length - 1];
     const high = Math.max(...priceList);
@@ -142,9 +138,8 @@ export default {
   
   getRealTimeBars(stock: string){
       const url = FMP_STOCK_QUOTE_URL+stock+"?apikey="+getApiKey()
-      console.log("1FMP", url)
       pricesDict.set(stock.toUpperCase(), [])
-      intervalDict.set(stock.toUpperCase(), setInterval(getRealtimeThingies2.bind(null, url), 1000)) 
+      intervalDict.set(stock.toUpperCase(), setInterval(pullStock.bind(null, url), 1000)) 
       const price2: PriceInterface2 = {
         name: stock
       };
