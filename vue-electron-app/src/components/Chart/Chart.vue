@@ -11,7 +11,9 @@
         :options="stockOptions"
       ></highcharts>
     </span>
-    <span v-else> NULL </span>
+    <span v-else>
+      <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
+    </span>
   </div>
 </template>
 

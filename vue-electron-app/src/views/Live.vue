@@ -4,14 +4,6 @@
       <search v-on:stockSearch="findStock($event)"></search>
       <br />
       <div>
-        <!--         <chart
-          v-on:closeChart="deleteChart($event)"
-          v-for="(stk, name) in message"
-          :key="stk.t"
-          v-bind:incData="stk"
-          v-bind:name="name"
-          v-bind:rangeSelect="rangeSelect"
-        ></chart> -->
         <price
           v-for="(stk, name) in stockPrices"
           :key="name"
@@ -38,45 +30,28 @@ export default {
   components: { search, price },
   data() {
     return {
-      stockCode: null
+      stockCode: null,
     };
   },
   methods: {
-    findStock: async function(stockCode) {
+    findStock: async function (stockCode) {
       if (!stockCode) {
         this.$notify({
           group: "app",
           text: "Missing input",
-          type: "warn"
+          type: "warn",
         });
       } else {
-        /*  var start = new Date()
-        start.setHours(0, 0, 0, 0)
-        store.dispatch(pricesStoreName + '/socketOnmessage', {
-          data: JSON.stringify(
-            await stockService.getStockInformation(
-              start,
-              new Date(),
-              stockCode.trim(),
-              '1Min'
-            )
-          )
-        })
-        this.$socket.send('s-' + stockCode.trim()) */
         stockService.getStockInformation(stockCode);
       }
     },
     deleteChart(data) {
-      // this.$socket.send('u-' + stockCode.trim())
       stockService.cancelSubscription(data);
-    }
+    },
   },
   computed: {
     ...mapState(pricesStoreName, ["stockPrices"]),
-    ...mapState(barsStoreName, ["message"])
-  }
-  /*   beforeCreate() {
-    store.dispatch(pricesStoreName + "/resetState");
-  }, */
+    ...mapState(barsStoreName, ["message"]),
+  },
 };
 </script>
