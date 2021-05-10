@@ -1,23 +1,24 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Conf = require("conf");
 const config = new Conf();
 
 export default {
   /**
-   * 
+   *
    * @returns currently used broker service
    */
   getActiveService() {
     return config.get("service");
   },
   /**
-   * 
+   *
    * @returns currently used data service
    */
   getActiveDataService() {
     return config.get("dataService");
   },
   /**
-   * 
+   *
    * @param {*} name configuration name
    * @returns configuration if exists
    */
@@ -25,7 +26,7 @@ export default {
     return config.get(name);
   },
   /**
-   * 
+   *
    * @param {*} name configuration name
    * @returns current service configuration
    */
@@ -34,7 +35,7 @@ export default {
   },
   /**
    * Set currently active service configuration
-   * 
+   *
    * @param {*} name configuration name
    * @param {*} value configuration value
    */
@@ -42,7 +43,7 @@ export default {
     config.set(this.getActiveService() + "." + name, value);
   },
   /**
-   * 
+   *
    * @param {*} name configuration name
    * @returns currently active data service configuration
    */
@@ -51,16 +52,16 @@ export default {
   },
   /**
    * Set configuration for currently active data service
-   * 
+   *
    * @param {*} name configuration name
    * @param {*} value configuration value
    */
   setDataServiceConfiguration(name, value) {
     config.set(this.getActiveDataService() + "." + name, value);
   },
-   /**
+  /**
    * Set configuration
-   * 
+   *
    * @param {*} name configuration name
    * @param {*} value configuration value
    */

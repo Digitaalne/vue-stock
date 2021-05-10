@@ -23,8 +23,8 @@ const mutations = {
   },
   /**
    * Add new data to existing data
-   * 
-   * @param {*} state 
+   *
+   * @param {*} state
    * @param {*} message new incoming message
    */
   SOCKET_ONMESSAGE(state, message) {

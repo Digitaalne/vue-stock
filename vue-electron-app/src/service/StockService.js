@@ -6,12 +6,12 @@ import fmpService from "./FmpService";
 export default {
   /**
    * Return stock price information in history
-   * 
+   *
    * @param {*} startDate first date of range
    * @param {*} endDate second date of range
    * @param {*} stock requested stock
    * @param {*} tf bar timeframe
-   * @returns 
+   * @returns
    */
   async getHistoricStockInformation(startDate, endDate, stock, tf) {
     const activeService = confService.getActiveDataService();
@@ -49,8 +49,9 @@ export default {
    * @returns list of possible securities
    */
   async searchStockSymbol(symbol) {
-    const activeService = confService.getActiveDataService();
-    if (activeService === "IBKR") {
+    const activeDataService = confService.getActiveDataService();
+    const activeService = confService.getActiveService();
+    if (activeDataService === "IBKR" || activeService === "IBKR") {
       if (symbol.length >= 1) {
         let stocks = await ibService.searchStockSymbol(symbol);
         stocks = stocks.slice(0, 10);
@@ -65,9 +66,9 @@ export default {
         }
         return resp;
       }
-    } else if (activeService === "ALPACA") {
-      return alpacaService.searchStockSymbol(symbol);
-    } else if (activeService === "FMP") {
+    } else if (activeDataService === "ALPACA") {
+      return;
+    } else if (activeDataService === "FMP") {
       const symbols = await fmpService.searchStockSymbol(symbol);
       const resp = [];
       for (let i = 0; i < symbols.length; i++) {
@@ -84,7 +85,7 @@ export default {
   },
   /**
    * Cancel security information subscription
-   * 
+   *
    * @param {*} data for cancellation
    */
   cancelSubscription(data) {
@@ -95,7 +96,7 @@ export default {
     } else if (activeService === "ALPACA") {
       alpacaService.cancelSubscription(data.name);
     } else if (activeService === "FMP") {
-    fmpService.cancelSubscription(data.name);
-  }
+      fmpService.cancelSubscription(data.name);
+    }
   }
 };

@@ -5,7 +5,7 @@ import alpacaService from "./AlpacaService.ts";
 export default {
   /**
    * Place order
-   * @param {*} options user's order input 
+   * @param {*} options user's order input
    * @param {*} data extra information if needed
    */
   placeOrder(options, data) {
@@ -17,7 +17,7 @@ export default {
     }
   },
   /**
-   * Get list of positions 
+   * Get list of positions
    * @returns promise of list of positions
    */
   getPositionList() {

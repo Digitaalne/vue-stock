@@ -7,5 +7,5 @@ export interface History {
   qty?: number;
   side?: string;
   type?: string;
-  transaction_time?: Date;
+  transaction_time?: Date | string;
 }

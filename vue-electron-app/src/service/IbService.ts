@@ -30,54 +30,8 @@ const pricesDict = new Map<number, PriceInterface>();
 const tickers = new Map<number, StockMetadata>();
 
 /**
- * Initialize IB service and communication with IB gateway
- */
-function init() {
-  const portString = confService.getServiceConfiguration("port");
-  ib = new IBApi({
-    port: Number(portString)
-  });
-  ib.connect();
-
-  ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
-    notificationService.notify({
-      group: "app",
-      text: error.message,
-      type: "error"
-    });
-    console.error("ERROR: " + error.message + " " + code + " " + reqId);
-  });
-}
-
-
-/**
- * Map incoming IB data format to position format.
- * 
- * @param contract position contract
- * @param pos user's position
- * @param avgCost average cost of security
- * @param account position's account
- * @returns Position object
- */
-function mapToPosition(
-  contract: Contract,
-  pos: number,
-  avgCost: number,
-  account: string
-): Position {
-  return {
-    symbol: contract.symbol,
-    exchange: contract.exchange,
-    asset_class: contract.secType,
-    qty: pos,
-    avg_entry_price: avgCost,
-    account: account
-  };
-}
-
-/**
  * If enough time is passed then map stored information to chart supported format and dispatch it to store.
- * 
+ *
  * @param id security request id
  */
 function mapToChartFormat(id: number) {
@@ -115,6 +69,103 @@ function mapToChartFormat(id: number) {
   }
 }
 
+/**
+ * Initialize IB service and communication with IB gateway
+ */
+function init() {
+  const portString = confService.getServiceConfiguration("port");
+  ib = new IBApi({
+    port: Number(portString)
+  });
+  ib.connect();
+
+  ib.on(EventName.error, (error: Error, code: ErrorCode, reqId: number) => {
+    notificationService.notify({
+      group: "app",
+      text: error.message,
+      type: "error"
+    });
+    console.error("ERROR: " + error.message + " " + code + " " + reqId);
+  });
+  /**
+   * On open order notify user about state
+   */
+  ib.on(
+    EventName.openOrder,
+    (
+      orderId: number,
+      contract: Contract,
+      order: Order,
+      orderState: OrderState
+    ) => {
+      notificationService.notify({
+        group: "app",
+        text: "Order: " + orderId + " state:" + orderState.status,
+        type: "info"
+      });
+      console.log("status " + orderState.status);
+    }
+  );
+  /**
+   * On incoming ticks store information to current security map
+   */
+  ib.on(
+    EventName.tickPrice,
+    (tickerId: number, field: TickType, value: number, attribs: unknown) => {
+      const tickList = pricesDict.get(tickerId);
+      if (TickType.DELAYED_ASK === field || TickType.ASK === field) {
+        tickList?.askPrice.push(value);
+        const price: PriceInterface2 = {
+          askPrice: value,
+          name: tickers.get(tickerId)?.contract.symbol!
+        };
+        store.dispatch(PRICE_STORE_NAME + "/update", price);
+      } else if (TickType.BID === field || TickType.DELAYED_BID === field) {
+        tickList?.bidPrice.push(value);
+        const price: PriceInterface2 = {
+          bidPrice: value,
+          name: tickers.get(tickerId)?.contract.symbol!
+        };
+        store.dispatch(PRICE_STORE_NAME + "/update", price);
+      } else if (TickType.DELAYED_LAST === field || TickType.LAST === field) {
+        console.log("push " + tickerId);
+        tickList?.lastPrice.push(value);
+        const price: PriceInterface2 = {
+          lastPrice: value,
+          name: tickers.get(tickerId)?.contract.symbol!
+        };
+        store.dispatch(PRICE_STORE_NAME + "/update", price);
+        mapToChartFormat(tickerId);
+      }
+    }
+  );
+}
+
+/**
+ * Map incoming IB data format to position format.
+ *
+ * @param contract position contract
+ * @param pos user's position
+ * @param avgCost average cost of security
+ * @param account position's account
+ * @returns Position object
+ */
+function mapToPosition(
+  contract: Contract,
+  pos: number,
+  avgCost: number,
+  account: string
+): Position {
+  return {
+    symbol: contract.symbol,
+    exchange: contract.exchange,
+    asset_class: contract.secType,
+    qty: pos,
+    avg_entry_price: avgCost,
+    account: account
+  };
+}
+
 if (confService.getActiveService() === "IBKR") {
   init();
 }
@@ -122,11 +173,11 @@ if (confService.getActiveService() === "IBKR") {
 export default {
   /**
    * get all user's positions
-   * 
+   *
    * @returns promise that returns user's positions
    */
   async getPosition() {
-    const prom = new Promise(function(resolve, reject) {
+    const prom = new Promise(function(resolve) {
       const posList: Position[] = [];
       ib.on(
         EventName.position,
@@ -140,6 +191,7 @@ export default {
         }
       ).once(EventName.positionEnd, () => {
         ib.cancelPositions();
+        ib.removeListener(EventName.position);
         resolve(posList);
       });
     });
@@ -148,7 +200,7 @@ export default {
   },
   /**
    * Get information for candlestick bars for wanted contract.
-   * 
+   *
    * @param contract findable contract
    */
   getRealTimeBars(contract: Contract) {
@@ -181,49 +233,17 @@ export default {
 
       store.dispatch(PRICE_STORE_NAME + "/update", price2);
     });
-    /**
-     * On incoming ticks store information to current security map
-     */
-    ib.on(
-      EventName.tickPrice,
-      (tickerId: number, field: TickType, value: number, attribs: unknown) => {
-        const tickList = pricesDict.get(tickerId);
-        if (TickType.DELAYED_ASK === field || TickType.ASK === field) {
-          tickList?.askPrice.push(value);
-          const price: PriceInterface2 = {
-            askPrice: value,
-            name: tickers.get(tickerId)?.contract.symbol!
-          };
-          store.dispatch(PRICE_STORE_NAME + "/update", price);
-        } else if (TickType.BID === field || TickType.DELAYED_BID === field) {
-          tickList?.bidPrice.push(value);
-          const price: PriceInterface2 = {
-            bidPrice: value,
-            name: tickers.get(tickerId)?.contract.symbol!
-          };
-          store.dispatch(PRICE_STORE_NAME + "/update", price);
-        } else if (TickType.DELAYED_LAST === field || TickType.LAST === field) {
-          console.log("push " + tickerId);
-          tickList?.lastPrice.push(value);
-          const price: PriceInterface2 = {
-            lastPrice: value,
-            name: tickers.get(tickerId)?.contract.symbol!
-          };
-          store.dispatch(PRICE_STORE_NAME + "/update", price);
-          mapToChartFormat(tickerId);
-        }
-      }
-    );
+
     ib.reqIds();
   },
   /**
    * Search possible suitable securties for current user input
-   * 
+   *
    * @param pattern user text input
    * @returns list of possible securities
    */
   searchStockSymbol(pattern: string) {
-    const prom = new Promise(function(resolve, reject) {
+    const prom = new Promise(function(resolve) {
       ib.once(EventName.nextValidId, (id: number) => {
         ib.reqMatchingSymbols(id, pattern);
       });
@@ -239,7 +259,7 @@ export default {
   },
   /**
    * Place order for security.
-   * 
+   *
    * @param input user's options for order
    * @param contract contract for order
    * @returns -
@@ -277,7 +297,7 @@ export default {
     order.lmtPrice = input.limit_price;
     order.auxPrice = input.stop_price;
     order.tif = input.time_in_force;
-    const account = confService.getServiceConfiguration("account")
+    const account = confService.getServiceConfiguration("account");
     if (account == null) {
       notificationService.notify({
         group: "app",
@@ -290,33 +310,16 @@ export default {
     ib.once(EventName.nextValidId, (id: number) => {
       ib.placeOrder(id, contract, order);
     });
-    ib.on(
-      EventName.openOrder,
-      (
-        orderId: number,
-        contract: Contract,
-        order: Order,
-        orderState: OrderState
-      ) => {
-        notificationService.notify({
-          group: "app",
-          text: "Order: " + orderId + " state:" + orderState.status,
-          type: "info"
-        });
-        console.log("status " + orderState.status);
-      }
-    );
-
     ib.reqIds();
   },
   /**
    * Get list of all possible accounts
-   * 
+   *
    * @returns promise of list of accounts
    */
   getAllAccounts() {
-    const prom = new Promise(function(resolve, reject) {
-      ib.on(EventName.managedAccounts, (accountsList: string) => {
+    const prom = new Promise(function(resolve) {
+      ib.once(EventName.managedAccounts, (accountsList: string) => {
         resolve(accountsList.split(","));
       });
     });
@@ -325,12 +328,12 @@ export default {
   },
   /**
    * Get execution history
-   * 
+   *
    * @returns promise of list of history
    */
   getOrderHistory() {
     const response: History[] = [];
-    const prom = new Promise(function(resolve, reject) {
+    const prom = new Promise(function(resolve) {
       ib.once(EventName.nextValidId, (id: number) => {
         ib.reqExecutions(id, new Object());
       });
@@ -343,11 +346,12 @@ export default {
           history.qty = execution.shares;
           history.cum_qty = execution.cumQty;
           history.price = execution.price;
-          history.transaction_time = new Date(execution.time!);
+          history.transaction_time = execution.time;
           response.push(history);
         }
       );
       ib.once(EventName.execDetailsEnd, () => {
+        ib.removeListener(EventName.execDetails);
         resolve(response);
       });
     });

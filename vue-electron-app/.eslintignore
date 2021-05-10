@@ -1,4 +1,2 @@
-test/unit/coverage/**
-test/unit/*.js
-test/e2e/*.js
-**/*
+tests/unit/*
+tests/e2e/*

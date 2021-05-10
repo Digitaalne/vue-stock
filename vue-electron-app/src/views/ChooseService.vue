@@ -165,7 +165,7 @@ export default {
       secretKey: String,
       paper: Boolean,
       dataService: String,
-      apiKey: String,
+      apiKey: String
     };
   },
   created() {
@@ -221,11 +221,11 @@ export default {
       } else if (this.service === "ALPACA") {
         alpacaService.initialize();
       }
-    },
+    }
   },
   mounted() {
     this.getAccounts();
-  },
+  }
 };
 </script>
 

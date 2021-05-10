@@ -8,7 +8,7 @@ import notificationService from "./NotificationService";
 
 const SOCKET_STORE_NAME = "socketModule";
 const PRICE_STORE_NAME = "prices";
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Alpaca = require("@alpacahq/alpaca-trade-api");
 const HISTORIC_BARS_URL = "https://data.alpaca.markets/v2/stocks/{symbol}/bars";
 let alpaca: any;
@@ -26,12 +26,12 @@ function init() {
     configKeyId = confService.getServiceConfiguration("keyId");
     configSecretKey = confService.getServiceConfiguration("secretKey");
     configPaper = confService.getServiceConfiguration("paper");
-     alpaca = new Alpaca({
+    alpaca = new Alpaca({
       keyId: configKeyId,
       secretKey: configSecretKey,
       paper: configPaper,
       usePolygon: false
-    }); 
+    });
     const authObject = {
       action: "auth",
       key: configKeyId,
@@ -60,7 +60,7 @@ function init() {
 
     /**
      * Map incoming data to chart format and dispatch it to store
-     * @param event 
+     * @param event
      */
     socket.onmessage = function(event: any) {
       const eventObject = JSON.parse(event.data);
@@ -96,7 +96,7 @@ function init() {
     };
     /**
      * Notify user about error
-     * @param event 
+     * @param event
      */
     socket.onerror = function(event) {
       notificationService.notify({
@@ -130,7 +130,7 @@ export default {
 
   /**
    * Get information for candlestick bars for wanted security.
-   * 
+   *
    * @param stockCode user's input
    */
   getRealTimeBars(stockCode: string) {
@@ -156,7 +156,7 @@ export default {
 
   /**
    * Get historic stock price data
-   * 
+   *
    * @param startDate first date of the range
    * @param endDate second date of the range
    * @param symbol stock's symbol
@@ -170,8 +170,8 @@ export default {
     tf: string
   ) {
     console.log(symbol);
-    if(tf === "1D"){
-      tf = "1Day"
+    if (tf === "1D") {
+      tf = "1Day";
     }
     const url = HISTORIC_BARS_URL.replace("{symbol}", symbol);
     const bars = await AxiosService.get(url, {
@@ -207,7 +207,7 @@ export default {
 
   /**
    * Place order for requested security
-   * 
+   *
    * @param data user's input
    * @returns Promise of order
    */

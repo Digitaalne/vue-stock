@@ -28,56 +28,56 @@ export default {
     return {
       stockOptions: {
         title: {
-          text: this.name + " Stock Price",
+          text: this.name + " Stock Price"
         },
         rangeSelector: this.rangeSelect,
         yAxis: [
           {
             labels: {
               align: "right",
-              x: -3,
+              x: -3
             },
             title: {
-              text: "OHLC",
+              text: "OHLC"
             },
             height: "60%",
             lineWidth: 2,
             resize: {
-              enabled: true,
-            },
+              enabled: true
+            }
           },
           {
             labels: {
               align: "right",
-              x: -3,
+              x: -3
             },
             title: {
-              text: "Volume",
+              text: "Volume"
             },
             top: "65%",
             height: "35%",
             offset: 0,
-            lineWidth: 2,
-          },
+            lineWidth: 2
+          }
         ],
         tooltip: {
-          split: true,
+          split: true
         },
         series: [
           {
             type: "candlestick",
             name: this.name,
             data: this.incData?.stock_data_list,
-            turboThreshold: 10000,
+            turboThreshold: 10000
           },
           {
             type: "column",
             name: "Volume",
             data: this.incData?.stock_volume_list,
-            yAxis: 1,
-          },
-        ],
-      },
+            yAxis: 1
+          }
+        ]
+      }
     };
   },
   watch: {
@@ -86,9 +86,9 @@ export default {
       handler(newState) {
         this.stockOptions.series[0].data = newState.stock_data_list;
         this.stockOptions.series[1].data = newState.stock_volume_list;
-      },
-    },
-  },
+      }
+    }
+  }
 };
 </script>
 

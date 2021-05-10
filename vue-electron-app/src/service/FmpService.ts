@@ -1,11 +1,13 @@
 import axiosService from "./AxiosService.js";
-import confService from "../service/ConfService";import store from "../store/index";
+import confService from "../service/ConfService";
+import store from "../store/index";
 import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle.js";
 const FMP_HISTORICAL_URL = "https://fmpcloud.io/api/v3/historical-chart/";
-const FMP_HISTORICAL_DAY_URL = "https://fmpcloud.io/api/v3/historical-price-full/";
+const FMP_HISTORICAL_DAY_URL =
+  "https://fmpcloud.io/api/v3/historical-price-full/";
 const FMP_TICKER_SEARCH_URL = "https://fmpcloud.io/api/v3/search";
 const FMP_STOCK_NEWS_URL = "https://fmpcloud.io/api/v3/stock_news";
-const FMP_STOCK_QUOTE_URL = "https://fmpcloud.io/api/v3/quote/"
+const FMP_STOCK_QUOTE_URL = "https://fmpcloud.io/api/v3/quote/";
 const SOCKET_STORE_NAME = "socketModule";
 const PRICE_STORE_NAME = "prices";
 /* Interval that corresponds to how many prices goes into one bar */
@@ -33,7 +35,7 @@ function convertTimeframe(timeframe: string) {
 }
 
 /**
- * 
+ *
  * @returns api key string
  */
 function getApiKey() {
@@ -42,7 +44,7 @@ function getApiKey() {
 
 /**
  * build url responsible for stocks history
- * 
+ *
  * @param startDate first date of historic data (included)
  * @param endDate last date of historic data (included)
  * @param symbol stock symbol
@@ -85,44 +87,45 @@ function buildHistoricalDataUrl(
     );
   }
 }
-/**
- * Request stock information and store necessary to map
- * @param url where to pull from
- */
-async function pullStock(url:string){
-  let data = await axiosService.get(url);
-  pricesDict.get(data[0].symbol)?.push(data[0].price)
-  dispatchDataToStore(data[0].symbol)
-}
 
 /**
  * If enough information map it to app data structure and dispatch it to store
  * @param stock corresponding stock symbol
  */
-function dispatchDataToStore(stock:string){
-  let priceList = pricesDict.get(stock)!
-  if(priceList.length>=STOCK_PRICE_COUNT){
+function dispatchDataToStore(stock: string) {
+  const priceList = pricesDict.get(stock)!;
+  if (priceList.length >= STOCK_PRICE_COUNT) {
     const open = priceList[0];
     const close = priceList[priceList.length - 1];
     const high = Math.max(...priceList);
     const low = Math.min(...priceList);
     const date = new Date().getTime();
-    pricesDict.set(stock, [])
+    pricesDict.set(stock, []);
     store.dispatch(SOCKET_STORE_NAME + "/socketOnmessage", {
       data: JSON.stringify({
         [stock]: {
           stock_data_list: [[date, open, high, low, close]],
-          stock_volume_list: [[date, 0]],
+          stock_volume_list: [[date, 0]]
         }
       })
     });
   }
 }
 
+/**
+ * Request stock information and store necessary to map
+ * @param url where to pull from
+ */
+async function pullStock(url: string) {
+  const data = await axiosService.get(url);
+  pricesDict.get(data[0].symbol)?.push(data[0].price);
+  dispatchDataToStore(data[0].symbol);
+}
+
 export default {
   /**
    * Get historic stock price data
-   * 
+   *
    * @param startDate first date of the range
    * @param endDate second date of the range
    * @param symbol stock's symbol
@@ -160,7 +163,7 @@ export default {
   },
   /**
    * Find stocks for user input
-   * 
+   *
    * @param stock user's input
    * @returns list of possible stocks
    */
@@ -175,38 +178,44 @@ export default {
   },
   /**
    * Get latest news for requested stock
-   * 
+   *
    * @param stock requested stock
    * @returns promise of list of news
    */
   getStockNews(stock: string) {
     const url =
-      FMP_STOCK_NEWS_URL + "?tickers=" + stock + "&limit=10&apikey=" + getApiKey();
+      FMP_STOCK_NEWS_URL +
+      "?tickers=" +
+      stock +
+      "&limit=10&apikey=" +
+      getApiKey();
     return axiosService.get(url);
   },
-  
+
   /**
    * Get information for candlestick bars for wanted stock
-   * 
+   *
    * @param stock requested stock
    */
-  getRealTimeBars(stock: string){
-      const url = FMP_STOCK_QUOTE_URL+stock+"?apikey="+getApiKey()
-      pricesDict.set(stock.toUpperCase(), [])
-      intervalDict.set(stock.toUpperCase(), setInterval(pullStock.bind(null, url), 1000)) 
-      const price2: PriceInterface2 = {
-        name: stock
-      };
-      store.dispatch(PRICE_STORE_NAME + "/update", price2);
+  getRealTimeBars(stock: string) {
+    const url = FMP_STOCK_QUOTE_URL + stock + "?apikey=" + getApiKey();
+    pricesDict.set(stock.toUpperCase(), []);
+    intervalDict.set(
+      stock.toUpperCase(),
+      setInterval(pullStock.bind(null, url), 1000)
+    );
+    const price2: PriceInterface2 = {
+      name: stock
+    };
+    store.dispatch(PRICE_STORE_NAME + "/update", price2);
   },
   /**
    * Delete interval of unwanted stock
-   * 
+   *
    * @param stock to be deleted
    */
   cancelSubscription(stock: string) {
-    clearInterval(intervalDict.get(stock)!)
+    clearInterval(intervalDict.get(stock)!);
     store.dispatch(PRICE_STORE_NAME + "/delete", stock);
-  },
- 
+  }
 };

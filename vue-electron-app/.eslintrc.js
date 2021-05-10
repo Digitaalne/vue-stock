@@ -40,6 +40,13 @@ module.exports = {
       env: {
         jest: true
       }
+    },
+    {
+      files: ['*/**'],
+      rules: {
+        "camelcase" : "off",
+        "@typescript-eslint/camelcase": "off"
+      },
     }
   ]
 };
