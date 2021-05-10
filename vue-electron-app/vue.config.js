@@ -1,5 +1,3 @@
-const path = require("path");
-
 const electron = {
   pages: {
     index: {
@@ -11,14 +9,6 @@ const electron = {
     electronBuilder: {
       nodeIntegration: true
     }
-  }
-};
-
-const webConfig = {
-  target: "web",
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "backend.js"
   }
 };
 

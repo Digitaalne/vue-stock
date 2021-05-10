@@ -37,7 +37,7 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   mode: process.env.IS_ELECTRON ? "hash" : "history",
-  base: process.env.BASE_URL,
+  base: process.env.PUBLIC_PATH,
   routes
 });
 

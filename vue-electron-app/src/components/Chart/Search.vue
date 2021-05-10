@@ -10,7 +10,9 @@
             v-model="symbol"
             v-debounce:300ms="searchStockSymbol"
           />
-          <md-button class="md-primary" @click="startSearch">Search</md-button>
+          <md-button id="search-button" class="md-primary" @click="startSearch"
+            >Search</md-button
+          >
         </md-field>
       </div>
 
@@ -22,7 +24,7 @@
           <md-button
             v-for="(fav, index) in favs"
             :key="index"
-            @click="finishAutocomplete(fav)"
+            @click="finishAutocomplete({ symbol: fav })"
             class="md-icon-button"
             >{{ fav }}</md-button
           >
@@ -36,7 +38,7 @@
         @click="finishAutocomplete(searchAnswer)"
       >
         <span>
-          <span
+          <span id="info"
             >{{ searchAnswer.symbol }} - {{ searchAnswer.description }}</span
           >
           <md-button
@@ -68,7 +70,7 @@ export default {
       symbol: "",
       selectedStock: Object,
       possibleSymbols: [],
-      favs: null
+      favs: null,
     };
   },
   methods: {
@@ -98,14 +100,14 @@ export default {
 
     toggleFav(symbol) {
       return favouriteService.toggleFav(symbol);
-    }
+    },
   },
   created() {
     this.searchStockSymbol = debounce(this.searchStockSymbol, 300);
   },
   mounted() {
     this.favs = favouriteService.getFavs();
-  }
+  },
 };
 </script>
 

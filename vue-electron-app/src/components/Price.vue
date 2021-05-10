@@ -1,15 +1,15 @@
 <template>
   <div>
     <div>
-      <div v-if="data.askPrice !== undefined" class="price">
+      <div id="ask-price" v-if="data.askPrice !== undefined" class="price">
         ask price: {{ data.askPrice }}
       </div>
       <br />
-      <div v-if="data.bidPrice !== undefined" class="price">
+      <div id="bid-price" v-if="data.bidPrice !== undefined" class="price">
         bid price: {{ data.bidPrice }}
       </div>
       <br />
-      <div v-if="data.lastPrice !== undefined" class="price">
+      <div id="last-price" v-if="data.lastPrice !== undefined" class="price">
         last price: {{ data.lastPrice }}
       </div>
     </div>
@@ -18,10 +18,13 @@
         <span v-if="isFavourite"><md-icon>favorite</md-icon></span>
         <span v-else><md-icon>favorite_border</md-icon></span>
       </md-button>
-      <md-button class="md-accent" v-on:click="closeChart"
+      <md-button id="close-button" class="md-accent" v-on:click="closeChart"
         ><md-icon>clear</md-icon></md-button
       >
-      <md-button class="md-primary md-raised" v-on:click="changeModalVisibility"
+      <md-button
+        id="buy-button"
+        class="md-primary md-raised"
+        v-on:click="changeModalVisibility"
         >BUY OR SELL</md-button
       >
     </div>
@@ -75,7 +78,7 @@
           </md-field>
         </div>
 
-        <span v-if="type === 'stop_limit' || type === 'limit'">
+        <span id="stop-limit" v-if="type === 'stop_limit' || type === 'limit'">
           <md-field>
             <label for="limit_price">Limit Price</label>
             <md-input
@@ -87,7 +90,7 @@
           </md-field>
         </span>
 
-        <span v-if="type === 'stop_limit' || type === 'stop'">
+        <span id="stop-price" v-if="type === 'stop_limit' || type === 'stop'">
           <md-field>
             <label for="stop_price">Stop Price</label>
             <md-input
