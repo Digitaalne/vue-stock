@@ -9,7 +9,7 @@ import notificationService from "./NotificationService";
 const SOCKET_STORE_NAME = "socketModule";
 const PRICE_STORE_NAME = "prices";
 
-//const Alpaca = require("@alpacahq/alpaca-trade-api");
+const Alpaca = require("@alpacahq/alpaca-trade-api");
 const HISTORIC_BARS_URL = "https://data.alpaca.markets/v2/stocks/{symbol}/bars";
 let alpaca: any;
 let socket: WebSocket;
@@ -23,12 +23,12 @@ function init() {
     configKeyId = confService.getServiceConfiguration("keyId");
     configSecretKey = confService.getServiceConfiguration("secretKey");
     configPaper = confService.getServiceConfiguration("paper");
-   /*  alpaca = new Alpaca({
+     alpaca = new Alpaca({
       keyId: configKeyId,
       secretKey: configSecretKey,
       paper: configPaper,
       usePolygon: false
-    }); */
+    }); 
     const authObject = {
       action: "auth",
       key: configKeyId,

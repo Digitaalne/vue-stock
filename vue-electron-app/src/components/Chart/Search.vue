@@ -24,7 +24,7 @@
           <md-button
             v-for="(fav, index) in favs"
             :key="index"
-            @click="finishAutocomplete(fav)"
+            @click="finishAutocomplete({ symbol: fav })"
             class="md-icon-button"
             >{{ fav }}</md-button
           >

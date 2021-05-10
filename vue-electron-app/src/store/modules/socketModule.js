@@ -21,6 +21,12 @@ const mutations = {
   SOCKET_ONERROR(state, event) {
     console.error(state, event);
   },
+  /**
+   * Add new data to existing data
+   * 
+   * @param {*} state 
+   * @param {*} message new incoming message
+   */
   SOCKET_ONMESSAGE(state, message) {
     const toObj = JSON.parse(message.data);
     const keys = Object.keys(toObj);
