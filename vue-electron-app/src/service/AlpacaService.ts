@@ -17,6 +17,9 @@ let configKeyId: string;
 let configSecretKey: string;
 let configPaper: string;
 
+/**
+ * Initialize connection between app and Alpaca
+ */
 function init() {
   try {
     configKeyId = confService.getServiceConfiguration("keyId");
@@ -54,6 +57,10 @@ function init() {
       });
     };
 
+    /**
+     * Map incoming data to chart format and dispatch it to store
+     * @param event 
+     */
     socket.onmessage = function(event: any) {
       const eventObject = JSON.parse(event.data);
       for (let i = 0; i < eventObject.length; i++) {
@@ -86,6 +93,10 @@ function init() {
         }
       }
     };
+    /**
+     * Notify user about error
+     * @param event 
+     */
     socket.onerror = function(event) {
       notificationService.notify({
         group: "app",
@@ -108,10 +119,19 @@ if (confService.getActiveService() === "ALPACA") {
 }
 
 export default {
+  /**
+   * get list of user's positions
+   * @returns Promise of list of Positions
+   */
   async getPosition(): Promise<Position> {
     return alpaca.getPositions();
   },
 
+  /**
+   * Get information for candlestick bars for wanted security.
+   * 
+   * @param stockCode user's input
+   */
   getRealTimeBars(stockCode: string) {
     if (socket.readyState === socket.CLOSED) {
       notificationService.notify({
@@ -133,6 +153,15 @@ export default {
     store.dispatch(PRICE_STORE_NAME + "/update", price2);
   },
 
+  /**
+   * Get historic stock price data
+   * 
+   * @param startDate first date of the range
+   * @param endDate second date of the range
+   * @param symbol stock's symbol
+   * @param tf requested timeframe
+   * @returns list of bars
+   */
   async getHistoricalData(
     startDate: Date,
     endDate: Date,
@@ -160,7 +189,6 @@ export default {
       stock_data_list: [] as any[],
       stock_volume_list: [] as any[]
     };
-    console.log(bars.bars.length);
     for (let i = 0; i < bars.bars.length; i++) {
       const time = new Date(bars.bars[i].t).getTime();
       resp.stock_data_list.push([
@@ -176,6 +204,12 @@ export default {
     return resp;
   },
 
+  /**
+   * Place order for requested security
+   * 
+   * @param data user's input
+   * @returns Promise of order
+   */
   placeOrder(data: any) {
     return alpaca.createOrder({
       symbol: data.name,
@@ -189,12 +223,20 @@ export default {
     });
   },
 
+  /**
+   * Get list of order history/trade activities
+   * @returns Promise of list of history
+   */
   async getOrderHistory(): Promise<History> {
     return alpaca.getAccountActivities({
       activityTypes: ["FILL", "MA", "OPASN", "OPEXP", "OPXRC", "SSO", "SSP"]
     });
   },
 
+  /**
+   * Cancel security information subscription
+   * @param stockCode unwanted stock
+   */
   cancelSubscription(stockCode: string) {
     const cancelSubscription = {
       action: "unsubscribe",
@@ -203,6 +245,10 @@ export default {
     socket.send(JSON.stringify(cancelSubscription));
     store.dispatch(PRICE_STORE_NAME + "/delete", stockCode);
   },
+
+  /**
+   * Call out initilization between app and Alpaca
+   */
   initialize() {
     init();
   }
