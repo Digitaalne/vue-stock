@@ -133,7 +133,7 @@ export default {
    *
    * @param stockCode user's input
    */
-  getRealTimeBars(stockCode: string) {
+  async getRealTimeBars(stockCode: string) {
     if (socket.readyState === socket.CLOSED) {
       notificationService.notify({
         group: "app",
@@ -146,11 +146,21 @@ export default {
       action: "subscribe",
       bars: [stockCode]
     };
-    console.log(JSON.stringify(barsObject));
     socket.send(JSON.stringify(barsObject));
     const price2: PriceInterface2 = {
       name: stockCode
     };
+
+    const startDate = new Date();
+    startDate.setHours(0,0,0,0);
+    const endDate = new Date();
+    // Free API requires 15 minute delay
+    endDate.setMinutes(endDate.getMinutes()-15)
+
+    const historic = await this.getHistoricalData(startDate.toISOString(), endDate.toISOString() , stockCode, "1Min")
+    store.dispatch(SOCKET_STORE_NAME + "/" + "socketOnmessage", {
+      data: JSON.stringify({ [stockCode]: historic })
+    })
     store.dispatch(PRICE_STORE_NAME + "/update", price2);
   },
 
@@ -164,8 +174,8 @@ export default {
    * @returns list of bars
    */
   async getHistoricalData(
-    startDate: Date,
-    endDate: Date,
+    startDate: string,
+    endDate: string,
     symbol: string,
     tf: string
   ) {
@@ -176,8 +186,8 @@ export default {
     const url = HISTORIC_BARS_URL.replace("{symbol}", symbol);
     const bars = await AxiosService.get(url, {
       params: {
-        start: startDate.toISOString().split("T")[0],
-        end: endDate.toISOString().split("T")[0],
+        start: startDate,
+        end: endDate,
         timeframe: tf
       },
       headers: {

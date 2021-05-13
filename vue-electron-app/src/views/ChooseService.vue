@@ -165,18 +165,11 @@ export default {
       secretKey: String,
       paper: Boolean,
       dataService: String,
-      apiKey: String
+      apiKey: String,
     };
   },
   created() {
-    this.port = confService.getServiceConfiguration("port");
-    this.service = confService.getActiveService();
-    this.account = confService.getServiceConfiguration("account");
-    this.keyId = confService.getServiceConfiguration("keyId");
-    this.secretKey = confService.getServiceConfiguration("secretKey");
-    this.paper = confService.getServiceConfiguration("paper");
-    this.dataService = confService.getActiveDataService();
-    this.apiKey = confService.getDataServiceConfiguration("apiKey");
+    this.loadConf();
   },
   methods: {
     setPort() {
@@ -191,6 +184,7 @@ export default {
       ) {
         this.setDataService(this.service);
       }
+      this.loadConf();
     },
     async getAccounts() {
       if (this.service === "IBKR") {
@@ -211,6 +205,7 @@ export default {
     },
     setDataService() {
       confService.setConfiguration("dataService", this.dataService);
+      this.loadConf();
     },
     setApiKey() {
       confService.setDataServiceConfiguration("apiKey", this.apiKey);
@@ -221,11 +216,21 @@ export default {
       } else if (this.service === "ALPACA") {
         alpacaService.initialize();
       }
-    }
+    },
+    loadConf() {
+      this.port = confService.getServiceConfiguration("port");
+      this.service = confService.getActiveService();
+      this.account = confService.getServiceConfiguration("account");
+      this.keyId = confService.getServiceConfiguration("keyId");
+      this.secretKey = confService.getServiceConfiguration("secretKey");
+      this.paper = confService.getServiceConfiguration("paper");
+      this.dataService = confService.getActiveDataService();
+      this.apiKey = confService.getDataServiceConfiguration("apiKey");
+    },
   },
   mounted() {
     this.getAccounts();
-  }
+  },
 };
 </script>
 

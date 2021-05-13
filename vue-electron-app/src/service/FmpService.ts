@@ -197,7 +197,7 @@ export default {
    *
    * @param stock requested stock
    */
-  getRealTimeBars(stock: string) {
+  async getRealTimeBars(stock: string) {
     const url = FMP_STOCK_QUOTE_URL + stock + "?apikey=" + getApiKey();
     pricesDict.set(stock.toUpperCase(), []);
     intervalDict.set(
@@ -208,6 +208,13 @@ export default {
       name: stock
     };
     store.dispatch(PRICE_STORE_NAME + "/update", price2);
+    /** 
+     * Add today's historic data to live stock also.
+    const historic = await this.getHistoricalData(new Date(), new Date(), stock, "1Min")
+    store.dispatch(SOCKET_STORE_NAME + "/socketOnmessage",{
+      data: JSON.stringify({ [stock]: historic })
+    })
+    */
   },
   /**
    * Delete interval of unwanted stock

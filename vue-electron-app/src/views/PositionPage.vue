@@ -8,16 +8,16 @@
         <md-table-head>Symbol</md-table-head>
         <md-table-head>Exchange</md-table-head>
         <md-table-head>Asset Class</md-table-head>
-        <md-table-head>Average Entry Price ($)</md-table-head>
+        <md-table-head>Average Entry Price</md-table-head>
         <md-table-head>Quanitity</md-table-head>
-        <md-table-head>Market Value ($)</md-table-head>
-        <md-table-head>Cost Basis ($)</md-table-head>
-        <md-table-head>Unrealized profit/loss ($)</md-table-head>
+        <md-table-head>Market Value </md-table-head>
+        <md-table-head>Cost Basis</md-table-head>
+        <md-table-head>Unrealized profit/loss</md-table-head>
         <md-table-head>Unrealized profit/loss (%)</md-table-head>
-        <md-table-head>Unrealized profit/loss for the day ($)</md-table-head>
+        <md-table-head>Unrealized profit/loss for the day</md-table-head>
         <md-table-head>Unrealized profit/loss for the day (%)</md-table-head>
-        <md-table-head>Current Price ($)</md-table-head>
-        <md-table-head>Last Day Price ($)</md-table-head>
+        <md-table-head>Current Price</md-table-head>
+        <md-table-head>Last Day Price</md-table-head>
         <md-table-head>Change Today (%)</md-table-head>
       </md-table-row>
       <md-table-row v-for="position in positionList" :key="position.asset_id">
@@ -48,18 +48,18 @@ import paperService from "../service/PaperService.js";
 export default {
   data() {
     return {
-      positionList: null
+      positionList: null,
     };
   },
   methods: {
     async loadData() {
       this.positionList = await paperService.getPositionList();
       console.log(this.positionList);
-    }
+    },
   },
   created() {
     this.loadData();
-  }
+  },
 };
 </script>
 

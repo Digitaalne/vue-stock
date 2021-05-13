@@ -20,6 +20,8 @@ import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle";
 import confService from "../service/ConfService";
 import notificationService from "./NotificationService";
 
+let nextId: number;
+
 const CANDLESTICK_SECONDS = 60;
 
 const BARS_STORE_NAME = "socketModule";
@@ -139,6 +141,10 @@ function init() {
       }
     }
   );
+  ib.once(EventName.nextValidId, (id:number) => {
+    nextId = id;
+  })
+  ib.reqIds();
 }
 
 /**
@@ -207,34 +213,32 @@ export default {
     contract.exchange = "SMART";
     ib.reqMarketDataType(4);
     console.log(contract);
-    ib.once(EventName.nextValidId, (id: number) => {
-      ib.reqMktData(id, contract, "", false, false);
+    nextId++;
+    ib.reqMktData(nextId, contract, "", false, false);
 
-      const metadata: StockMetadata = {
-        lastUpdate: new Date(),
-        contract: contract,
-        tickerId: id
-      };
+    const metadata: StockMetadata = {
+      lastUpdate: new Date(),
+      contract: contract,
+      tickerId: nextId
+    };
 
-      tickers.set(id, metadata);
+    tickers.set(nextId, metadata);
 
-      const price: PriceInterface = {
-        askPrice: [],
-        bidPrice: [],
-        volume: [],
-        lastPrice: []
-      };
-      pricesDict.set(id, price);
+    const price: PriceInterface = {
+      askPrice: [],
+      bidPrice: [],
+      volume: [],
+      lastPrice: []
+    };
+    pricesDict.set(nextId, price);
 
-      const price2: PriceInterface2 = {
-        name: contract.symbol!,
-        metadata: metadata
-      };
+    const price2: PriceInterface2 = {
+      name: contract.symbol!,
+      metadata: metadata
+    };
 
-      store.dispatch(PRICE_STORE_NAME + "/update", price2);
-    });
-
-    ib.reqIds();
+    store.dispatch(PRICE_STORE_NAME + "/update", price2);
+    
   },
   /**
    * Search possible suitable securties for current user input
@@ -243,10 +247,9 @@ export default {
    * @returns list of possible securities
    */
   searchStockSymbol(pattern: string) {
+    nextId++;
     const prom = new Promise(function(resolve) {
-      ib.once(EventName.nextValidId, (id: number) => {
-        ib.reqMatchingSymbols(id, pattern);
-      });
+      ib.reqMatchingSymbols(nextId, pattern);
       ib.once(
         EventName.symbolSamples,
         (reqId: number, contractDescriptions: ContractDescription[]) => {
@@ -334,9 +337,8 @@ export default {
   getOrderHistory() {
     const response: History[] = [];
     const prom = new Promise(function(resolve) {
-      ib.once(EventName.nextValidId, (id: number) => {
-        ib.reqExecutions(id, new Object());
-      });
+      nextId++;
+      ib.reqExecutions(nextId, new Object());
       ib.on(
         EventName.execDetails,
         (reqId: number, contract: Contract, execution: Execution) => {
@@ -355,7 +357,6 @@ export default {
         resolve(response);
       });
     });
-    ib.reqIds();
     return prom;
   },
   /**
