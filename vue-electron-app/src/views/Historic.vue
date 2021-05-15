@@ -1,5 +1,9 @@
 <template>
   <div id="historic" class="container">
+    <div id="warning" v-if="showWarning === true">
+      <md-icon>info</md-icon> This functionality is not supported for selected
+      data service
+    </div>
     <div id="selection">
       <div class="half centered">
         <div class="md-layout-item">
@@ -39,19 +43,21 @@
 
 <script>
 import Vue from "vue";
-import StockService from "../service/StockService.js";
-import chart from "../components/Chart/Chart.vue";
+import stockService from "../service/stockService.js";
+import Chart from "../components/Chart/Chart.vue";
 import VCalendar from "v-calendar";
-import search from "../components/Chart/Search.vue";
+import Search from "../components/Chart/Search.vue";
+import confService from "../service/confService.js";
 
 Vue.use(VCalendar);
 
 export default {
-  name: "historic",
+  name: "Historic",
   // eslint-disable-next-line vue/no-unused-components
-  components: { chart, VCalendar, search },
+  components: { Chart, VCalendar, Search },
   data() {
     return {
+      showWarning: Boolean,
       dates: null,
       symbol: null,
       timeframe: null,
@@ -71,7 +77,7 @@ export default {
   methods: {
     searchStockInfo: async function (symbol) {
       if (this.checkInput(symbol)) {
-        const helper = await StockService.getHistoricStockInformation(
+        const helper = await stockService.getHistoricStockInformation(
           this.dates.start,
           this.dates.end,
           symbol,
@@ -106,5 +112,18 @@ export default {
       });
     },
   },
+  created() {
+    this.showWarning = confService.getActiveDataService() === "IBKR";
+  },
 };
 </script>
+
+<style lang="scss" scoped>
+#warning {
+  margin: 1% 5% 1% 5%;
+  padding: 15px 15px 15px 15px;
+  box-shadow: 5px 5px 5px -6px #000000;
+  background: #ff9800;
+  text-shadow: 0px 0px 0px #000000;
+}
+</style>

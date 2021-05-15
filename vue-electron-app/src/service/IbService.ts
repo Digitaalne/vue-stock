@@ -1,7 +1,7 @@
-import { Position } from "@/interfaces/Position";
-import { PriceInterface } from "@/interfaces/PriceInterface";
-import { StockMetadata } from "@/interfaces/StockMetadata";
-import { History } from "@/interfaces/History";
+import { Position } from "@/interfaces/position";
+import { PriceInterface } from "@/interfaces/priceInterface";
+import { StockMetadata } from "@/interfaces/stockMetadata";
+import { History } from "@/interfaces/history";
 import {
   IBApi,
   EventName,
@@ -16,9 +16,9 @@ import {
   OrderState
 } from "@stoqey/ib";
 import store from "../store/index";
-import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle";
-import confService from "../service/ConfService";
-import notificationService from "./NotificationService";
+import { PriceInterfaceSingle } from "@/interfaces/priceInterfaceSingle";
+import confService from "../service/confService";
+import notificationService from "./notificationService";
 
 let nextId: number;
 
@@ -117,14 +117,14 @@ function init() {
       const tickList = pricesDict.get(tickerId);
       if (TickType.DELAYED_ASK === field || TickType.ASK === field) {
         tickList?.askPrice.push(value);
-        const price: PriceInterface2 = {
+        const price: PriceInterfaceSingle = {
           askPrice: value,
           name: tickers.get(tickerId)?.contract.symbol!
         };
         store.dispatch(PRICE_STORE_NAME + "/update", price);
       } else if (TickType.BID === field || TickType.DELAYED_BID === field) {
         tickList?.bidPrice.push(value);
-        const price: PriceInterface2 = {
+        const price: PriceInterfaceSingle = {
           bidPrice: value,
           name: tickers.get(tickerId)?.contract.symbol!
         };
@@ -132,7 +132,7 @@ function init() {
       } else if (TickType.DELAYED_LAST === field || TickType.LAST === field) {
         console.log("push " + tickerId);
         tickList?.lastPrice.push(value);
-        const price: PriceInterface2 = {
+        const price: PriceInterfaceSingle = {
           lastPrice: value,
           name: tickers.get(tickerId)?.contract.symbol!
         };
@@ -141,9 +141,9 @@ function init() {
       }
     }
   );
-  ib.once(EventName.nextValidId, (id:number) => {
+  ib.once(EventName.nextValidId, (id: number) => {
     nextId = id;
-  })
+  });
   ib.reqIds();
 }
 
@@ -232,13 +232,12 @@ export default {
     };
     pricesDict.set(nextId, price);
 
-    const price2: PriceInterface2 = {
+    const price2: PriceInterfaceSingle = {
       name: contract.symbol!,
       metadata: metadata
     };
 
     store.dispatch(PRICE_STORE_NAME + "/update", price2);
-    
   },
   /**
    * Search possible suitable securties for current user input
@@ -336,7 +335,7 @@ export default {
    */
   getOrderHistory() {
     const response: History[] = [];
-    const prom = new Promise(function(resolve) {
+    return new Promise(function(resolve) {
       nextId++;
       ib.reqExecutions(nextId, new Object());
       ib.on(
@@ -357,7 +356,6 @@ export default {
         resolve(response);
       });
     });
-    return prom;
   },
   /**
    * Cancel security information subscription

@@ -31,21 +31,21 @@
 </template>
 
 <script>
-import paperService from "../service/PaperService.js";
+import paperService from "../service/paperService.js";
 export default {
   name: "TradeHistory",
   data() {
     return {
-      list: null
+      list: null,
     };
   },
   methods: {
     async loadData() {
       this.list = await paperService.getActivitesList();
-    }
+    },
   },
   created() {
     this.loadData();
-  }
+  },
 };
 </script>

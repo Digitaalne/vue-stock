@@ -50,7 +50,7 @@
         </md-card>
       </div>
     </div>
-    <div id="jobo">
+    <div id="inputs">
       <div v-if="service !== undefined">
         <div id="data-service-header" class="md-subheading">
           Choose data service:
@@ -149,9 +149,9 @@
 </template>
 
 <script>
-import ibService from "../service/IbService";
-import alpacaService from "../service/AlpacaService";
-import confService from "../service/ConfService";
+import ibService from "../service/ibService";
+import alpacaService from "../service/alpacaService";
+import confService from "../service/confService";
 
 export default {
   name: "chooseService",
@@ -235,7 +235,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#jobo {
+#inputs {
   margin: 0 5% 0 5%;
 }
 #data-service-header {

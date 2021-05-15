@@ -1,7 +1,7 @@
-import ibService from "./IbService";
-import alpacaService from "./AlpacaService.ts";
-import confService from "../service/ConfService";
-import fmpService from "./FmpService";
+import ibService from "./ibService";
+import alpacaService from "./alpacaService.ts";
+import confService from "../service/confService";
+import fmpService from "./fmpService";
 
 export default {
   /**

@@ -1,6 +1,6 @@
-import { StockMetadata } from "./StockMetadata";
+import { StockMetadata } from "./stockMetadata";
 
-export interface PriceInterface2 {
+export interface PriceInterfaceSingle {
   bidPrice?: number;
   askPrice?: number;
   volume?: number;

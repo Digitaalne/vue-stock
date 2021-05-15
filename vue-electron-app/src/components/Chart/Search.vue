@@ -60,8 +60,8 @@
 </template>
 
 <script>
-import favouriteService from "../../service/FavouriteService.js";
-import stockService from "../../service/StockService.js";
+import favouriteService from "../../service/favouriteService.js";
+import stockService from "../../service/stockService.js";
 import debounce from "debounce";
 export default {
   name: "Search",
@@ -70,7 +70,7 @@ export default {
       symbol: "",
       selectedStock: Object,
       possibleSymbols: [],
-      favs: null
+      favs: null,
     };
   },
   methods: {
@@ -100,14 +100,14 @@ export default {
 
     toggleFav(symbol) {
       return favouriteService.toggleFav(symbol);
-    }
+    },
   },
   created() {
     this.searchStockSymbol = debounce(this.searchStockSymbol, 300);
   },
   mounted() {
     this.favs = favouriteService.getFavs();
-  }
+  },
 };
 </script>
 

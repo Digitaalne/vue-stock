@@ -118,12 +118,12 @@
 </template>
 
 <script>
-import paperService from "../service/PaperService";
-import favouriteService from "../service/FavouriteService.js";
-import chart from "./Chart/Chart";
+import paperService from "../service/paperService";
+import favouriteService from "../service/favouriteService.js";
+import Chart from "./Chart/Chart";
 export default {
   props: ["name", "data", "incData"],
-  components: { chart },
+  components: { Chart },
   data() {
     return {
       isFavourite: this.isFav(),

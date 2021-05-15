@@ -1,6 +1,6 @@
-import ibService from "./IbService.ts";
-import confService from "./ConfService";
-import alpacaService from "./AlpacaService.ts";
+import ibService from "./ibService.ts";
+import confService from "./confService";
+import alpacaService from "./alpacaService.ts";
 
 export default {
   /**

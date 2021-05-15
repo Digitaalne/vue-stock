@@ -1,7 +1,8 @@
-import axiosService from "./AxiosService.js";
-import confService from "../service/ConfService";
+import axiosService from "./axiosService.js";
+import confService from "../service/confService";
 import store from "../store/index";
-import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle.js";
+import { PriceInterfaceSingle } from "@/interfaces/priceInterfaceSingle.js";
+
 const FMP_HISTORICAL_URL = "https://fmpcloud.io/api/v3/historical-chart/";
 const FMP_HISTORICAL_DAY_URL =
   "https://fmpcloud.io/api/v3/historical-price-full/";
@@ -204,7 +205,7 @@ export default {
       stock.toUpperCase(),
       setInterval(pullStock.bind(null, url), 1000)
     );
-    const price2: PriceInterface2 = {
+    const price2: PriceInterfaceSingle = {
       name: stock
     };
     store.dispatch(PRICE_STORE_NAME + "/update", price2);

@@ -1,10 +1,10 @@
-import { Position } from "@/interfaces/Position";
-import confService from "../service/ConfService";
-import { History } from "@/interfaces/History";
+import { Position } from "@/interfaces/position";
+import confService from "../service/confService";
+import { History } from "@/interfaces/history";
 import store from "../store/index";
-import { PriceInterface2 } from "@/interfaces/PriceInterfaceSingle";
-import AxiosService from "./AxiosService";
-import notificationService from "./NotificationService";
+import { PriceInterfaceSingle } from "@/interfaces/priceInterfaceSingle";
+import axiosService from "./axiosService";
+import notificationService from "./notificationService";
 
 const SOCKET_STORE_NAME = "socketModule";
 const PRICE_STORE_NAME = "prices";
@@ -147,20 +147,25 @@ export default {
       bars: [stockCode]
     };
     socket.send(JSON.stringify(barsObject));
-    const price2: PriceInterface2 = {
+    const price2: PriceInterfaceSingle = {
       name: stockCode
     };
 
     const startDate = new Date();
-    startDate.setHours(0,0,0,0);
+    startDate.setHours(0, 0, 0, 0);
     const endDate = new Date();
     // Free API requires 15 minute delay
-    endDate.setMinutes(endDate.getMinutes()-15)
+    endDate.setMinutes(endDate.getMinutes() - 15);
 
-    const historic = await this.getHistoricalData(startDate.toISOString(), endDate.toISOString() , stockCode, "1Min")
+    const historic = await this.getHistoricalData(
+      startDate.toISOString(),
+      endDate.toISOString(),
+      stockCode,
+      "1Min"
+    );
     store.dispatch(SOCKET_STORE_NAME + "/" + "socketOnmessage", {
       data: JSON.stringify({ [stockCode]: historic })
-    })
+    });
     store.dispatch(PRICE_STORE_NAME + "/update", price2);
   },
 
@@ -184,7 +189,7 @@ export default {
       tf = "1Day";
     }
     const url = HISTORIC_BARS_URL.replace("{symbol}", symbol);
-    const bars = await AxiosService.get(url, {
+    const bars = await axiosService.get(url, {
       params: {
         start: startDate,
         end: endDate,
