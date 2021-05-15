@@ -89,7 +89,6 @@ export default {
    * @param {*} data for cancellation
    */
   cancelSubscription(data) {
-    console.log(data);
     const activeService = confService.getActiveDataService();
     if (activeService === "IBKR") {
       ibService.cancelSubscription(data);

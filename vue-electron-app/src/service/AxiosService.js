@@ -9,7 +9,6 @@ async function request(config) {
     requestConfig.headers = {};
   }
   try {
-    console.log(requestConfig.url);
     const response = await axios.request(requestConfig);
     return response.data;
   } catch (error) {

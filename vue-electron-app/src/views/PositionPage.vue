@@ -64,7 +64,6 @@ export default {
   methods: {
     async loadData() {
       this.positionList = await paperService.getPositionList();
-      console.log(this.positionList);
     }
   },
   created() {

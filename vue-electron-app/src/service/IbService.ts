@@ -105,7 +105,6 @@ function init() {
         text: "Order: " + orderId + " state:" + orderState.status,
         type: "info"
       });
-      console.log("status " + orderState.status);
     }
   );
   /**
@@ -130,7 +129,6 @@ function init() {
         };
         store.dispatch(PRICE_STORE_NAME + "/update", price);
       } else if (TickType.DELAYED_LAST === field || TickType.LAST === field) {
-        console.log("push " + tickerId);
         tickList?.lastPrice.push(value);
         const price: PriceInterfaceSingle = {
           lastPrice: value,
@@ -212,7 +210,6 @@ export default {
   getRealTimeBars(contract: Contract) {
     contract.exchange = "SMART";
     ib.reqMarketDataType(4);
-    console.log(contract);
     nextId++;
     ib.reqMktData(nextId, contract, "", false, false);
 
@@ -267,8 +264,6 @@ export default {
    * @returns -
    */
   placeOrder(input: any, contract: Contract) {
-    console.log("placed contract ");
-    console.log(contract);
     const order: Order = new Object();
 
     switch (input.type) {

@@ -65,7 +65,6 @@ function init() {
     socket.onmessage = function(event: any) {
       const eventObject = JSON.parse(event.data);
       for (let i = 0; i < eventObject.length; i++) {
-        console.log(eventObject);
         if (eventObject[i].T === "b") {
           const resp = {
             name: eventObject[i].S,
@@ -141,7 +140,6 @@ export default {
         type: "error"
       });
     }
-    console.log(socket);
     const barsObject = {
       action: "subscribe",
       bars: [stockCode]
@@ -184,7 +182,6 @@ export default {
     symbol: string,
     tf: string
   ) {
-    console.log(symbol);
     if (tf === "1D") {
       tf = "1Day";
     }
@@ -216,7 +213,6 @@ export default {
       ]);
       resp.stock_volume_list.push([time, bars.bars[i].v]);
     }
-    console.log(resp);
     return resp;
   },
 

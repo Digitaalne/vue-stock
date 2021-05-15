@@ -85,7 +85,6 @@ export default {
         );
         if (helper && helper.stock_data_list.length > 0) {
           this.stockList.push(helper);
-          console.log(this.stockList);
         } else {
           Vue.notify({
             group: "app",
