@@ -58,18 +58,18 @@ import paperService from "../service/paperService.js";
 export default {
   data() {
     return {
-      positionList: null,
+      positionList: null
     };
   },
   methods: {
     async loadData() {
       this.positionList = await paperService.getPositionList();
       console.log(this.positionList);
-    },
+    }
   },
   created() {
     this.loadData();
-  },
+  }
 };
 </script>
 

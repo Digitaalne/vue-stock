@@ -66,16 +66,16 @@ export default {
         buttons: [
           {
             type: "all",
-            text: "ALL",
-          },
+            text: "ALL"
+          }
         ],
         selected: 0,
-        inputEnabled: false,
-      },
+        inputEnabled: false
+      }
     };
   },
   methods: {
-    searchStockInfo: async function (symbol) {
+    searchStockInfo: async function(symbol) {
       if (this.checkInput(symbol)) {
         const helper = await stockService.getHistoricStockInformation(
           this.dates.start,
@@ -90,7 +90,7 @@ export default {
           Vue.notify({
             group: "app",
             text: "Information not found!",
-            type: "warn",
+            type: "warn"
           });
         }
       }
@@ -100,21 +100,21 @@ export default {
         Vue.notify({
           group: "app",
           text: "Missing input",
-          type: "warn",
+          type: "warn"
         });
         return false;
       }
       return true;
     },
     deleteChart(stockCode) {
-      this.stockList = this.stockList.filter(function (stock) {
+      this.stockList = this.stockList.filter(function(stock) {
         return stock.name !== stockCode;
       });
-    },
+    }
   },
   created() {
     this.showWarning = confService.getActiveDataService() === "IBKR";
-  },
+  }
 };
 </script>
 

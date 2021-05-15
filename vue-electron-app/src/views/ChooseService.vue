@@ -165,7 +165,7 @@ export default {
       secretKey: String,
       paper: Boolean,
       dataService: String,
-      apiKey: String,
+      apiKey: String
     };
   },
   created() {
@@ -226,11 +226,11 @@ export default {
       this.paper = confService.getServiceConfiguration("paper");
       this.dataService = confService.getActiveDataService();
       this.apiKey = confService.getDataServiceConfiguration("apiKey");
-    },
+    }
   },
   mounted() {
     this.getAccounts();
-  },
+  }
 };
 </script>
 
