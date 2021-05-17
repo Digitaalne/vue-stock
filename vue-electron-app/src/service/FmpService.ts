@@ -142,6 +142,9 @@ export default {
     timeframe = convertTimeframe(timeframe);
     const url = buildHistoricalDataUrl(startDate, endDate, symbol, timeframe);
     let dataObject = await axiosService.get(url);
+    if(dataObject.historical !== undefined){
+      dataObject = dataObject.historical
+    }
     dataObject = dataObject.reverse();
     const response = [];
     const volumeResponse = [];

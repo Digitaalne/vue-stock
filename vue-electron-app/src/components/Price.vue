@@ -35,84 +35,89 @@
     ></chart>
     <!-- -->
     <md-dialog :md-active.sync="modalVisible" @close="changeModalVisibility">
-      <div id="modal">
-        <div class="md-layout-item">
-          <md-field>
-            <label for="qty">Quantity</label>
-            <md-input
-              type="number"
-              id="qty"
-              v-model="quantity"
-              name="qty"
-              min="1"
-            />
-          </md-field>
+      <md-dialog-content>
+        <div id="modal">
+          <div class="md-layout-item">
+            <md-field>
+              <label for="qty">Quantity</label>
+              <md-input
+                type="number"
+                id="qty"
+                v-model="quantity"
+                name="qty"
+                min="1"
+              />
+            </md-field>
+          </div>
+
+          <md-radio id="sell" value="sell" v-model="side">Sell</md-radio>
+          <md-radio id="buy" value="buy" v-model="side">Buy</md-radio>
+
+          <div class="md-layout-item">
+            <md-field>
+              <label>Type</label>
+              <md-select id="type" v-model="type">
+                <md-option value="market">Market</md-option>
+                <md-option value="limit">Limit</md-option>
+                <md-option value="stop">Stop</md-option>
+                <md-option value="stop_limit">Stop limit</md-option>
+              </md-select>
+            </md-field>
+          </div>
+
+          <div class="md-layout-item">
+            <md-field>
+              <label>Time in Force</label>
+              <md-select id="time_in_force" v-model="time_in_force">
+                <md-option value="day">Day</md-option>
+                <md-option value="gtc">Good until canceled</md-option>
+                <md-option value="opg">OPG</md-option>
+                <md-option value="cls">CLS</md-option>
+                <md-option value="ioc">Immediate Or Cancel</md-option>
+                <md-option value="fok">Fill or Kill</md-option>
+              </md-select>
+            </md-field>
+          </div>
+
+          <span
+            id="stop-limit"
+            v-if="type === 'stop_limit' || type === 'limit'"
+          >
+            <md-field>
+              <label for="limit_price">Limit Price</label>
+              <md-input
+                type="number"
+                id="limit_price"
+                v-model="limit_price"
+                name="limit_price"
+              />
+            </md-field>
+          </span>
+
+          <span id="stop-price" v-if="type === 'stop_limit' || type === 'stop'">
+            <md-field>
+              <label for="stop_price">Stop Price</label>
+              <md-input
+                type="number"
+                id="stop_price"
+                v-model="stop_price"
+                name="stop_price"
+              />
+            </md-field>
+          </span>
+
+          <md-checkbox
+            id="extended_hours"
+            name="extended_hours"
+            v-model="extended_hours"
+            >Extended hours</md-checkbox
+          >
+          <br />
+          <md-button @click="placeOrder()" class="md-primary md-raised"
+            >Place Order</md-button
+          >
         </div>
-
-        <md-radio id="sell" value="sell" v-model="side">Sell</md-radio>
-        <md-radio id="buy" value="buy" v-model="side">Buy</md-radio>
-
-        <div class="md-layout-item">
-          <md-field>
-            <label>Type</label>
-            <md-select id="type" v-model="type">
-              <md-option value="market">Market</md-option>
-              <md-option value="limit">Limit</md-option>
-              <md-option value="stop">Stop</md-option>
-              <md-option value="stop_limit">Stop limit</md-option>
-            </md-select>
-          </md-field>
-        </div>
-
-        <div class="md-layout-item">
-          <md-field>
-            <label>Time in Force</label>
-            <md-select id="time_in_force" v-model="time_in_force">
-              <md-option value="day">Day</md-option>
-              <md-option value="gtc">Good until canceled</md-option>
-              <md-option value="opg">OPG</md-option>
-              <md-option value="cls">CLS</md-option>
-              <md-option value="ioc">Immediate Or Cancel</md-option>
-              <md-option value="fok">Fill or Kill</md-option>
-            </md-select>
-          </md-field>
-        </div>
-
-        <span id="stop-limit" v-if="type === 'stop_limit' || type === 'limit'">
-          <md-field>
-            <label for="limit_price">Limit Price</label>
-            <md-input
-              type="number"
-              id="limit_price"
-              v-model="limit_price"
-              name="limit_price"
-            />
-          </md-field>
-        </span>
-
-        <span id="stop-price" v-if="type === 'stop_limit' || type === 'stop'">
-          <md-field>
-            <label for="stop_price">Stop Price</label>
-            <md-input
-              type="number"
-              id="stop_price"
-              v-model="stop_price"
-              name="stop_price"
-            />
-          </md-field>
-        </span>
-
-        <md-checkbox
-          id="extended_hours"
-          name="extended_hours"
-          v-model="extended_hours"
-          >Extended hours</md-checkbox
-        >
-        <br />
-        <md-button @click="placeOrder()" class="md-primary md-raised"
-          >Place Order</md-button
-        >
-      </div>
+      </md-dialog-content>
     </md-dialog>
   </div>
 </template>
@@ -141,21 +146,21 @@ export default {
           {
             type: "hour",
             count: 1,
-            text: "1h"
+            text: "1h",
           },
           {
             type: "day",
             count: 1,
-            text: "1D"
-          }
+            text: "1D",
+          },
         ],
         selected: 0,
-        inputEnabled: false
-      }
+        inputEnabled: false,
+      },
     };
   },
   methods: {
-    placeOrder: async function() {
+    placeOrder: async function () {
       if (this.validateInput()) {
         if (
           await paperService.placeOrder(
@@ -167,15 +172,17 @@ export default {
               type: this.type,
               side: this.side,
               time_in_force: this.time_in_force,
-              extended_hours: this.extended_hours
+              extended_hours: this.extended_hours,
             },
             this.data
           )
         ) {
+          this.limit_price = null;
+          this.stop_price = null;
           this.$notify({
             group: "app",
             text: "Order successfully placed",
-            type: "success"
+            type: "success",
           });
         }
       }
@@ -196,7 +203,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Missing input",
-          type: "warn"
+          type: "warn",
         });
         return false;
       } else if (
@@ -206,7 +213,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Limit price is unassigned",
-          type: "warn"
+          type: "warn",
         });
         return false;
       } else if (
@@ -216,7 +223,7 @@ export default {
         this.$notify({
           group: "app",
           text: "Stop price is unassigned",
-          type: "warn"
+          type: "warn",
         });
         return false;
       } else if (
@@ -228,7 +235,7 @@ export default {
           group: "app",
           text:
             "Extended hours only works with type limit and time in force is equal to day",
-          type: "warn"
+          type: "warn",
         });
         return false;
       }
@@ -244,8 +251,8 @@ export default {
     },
     closeChart() {
       this.$emit("closeChart", this.data);
-    }
-  }
+    },
+  },
 };
 </script>
 

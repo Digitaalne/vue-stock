@@ -107,11 +107,6 @@ function init() {
     };
   } catch (error) {
     console.error(error);
-    notificationService.notify({
-      group: "app",
-      text: "Error with Alpaca service init",
-      type: "error"
-    });
   }
 }
 if (confService.getActiveService() === "ALPACA") {
@@ -197,6 +192,9 @@ export default {
         "APCA-API-SECRET-KEY": configSecretKey
       }
     });
+    if(bars === undefined){
+      return;
+    }
     const resp = {
       name: bars.symbol,
       stock_data_list: [] as any[],
@@ -263,5 +261,12 @@ export default {
    */
   initialize() {
     init();
+  },
+
+  /**
+   * Get market status.
+   */
+  getMarketStatus(){
+    return alpaca.getClock()
   }
 };

@@ -97,5 +97,15 @@ export default {
     } else if (activeService === "FMP") {
       fmpService.cancelSubscription(data.name);
     }
+  },
+  /**
+   * Get market status. Opened or not
+   * @returns information about market
+   */
+  getMarketStatus(){
+    const activeService = confService.getActiveService();
+    if (activeService === "ALPACA") {
+      return alpacaService.getMarketStatus();
+    }
   }
 };
