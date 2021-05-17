@@ -39,16 +39,16 @@ export default {
   data() {
     return {
       stockCode: null,
-      marketData: undefined,
+      marketData: undefined
     };
   },
   methods: {
-    findStock: async function (stockCode) {
+    findStock: async function(stockCode) {
       if (!stockCode) {
         this.$notify({
           group: "app",
           text: "Missing input",
-          type: "warn",
+          type: "warn"
         });
       } else {
         stockService.getStockInformation(stockCode);
@@ -56,15 +56,15 @@ export default {
     },
     deleteChart(data) {
       stockService.cancelSubscription(data);
-    },
+    }
   },
   computed: {
     ...mapState(pricesStoreName, ["stockPrices"]),
-    ...mapState(barsStoreName, ["message"]),
+    ...mapState(barsStoreName, ["message"])
   },
   async created() {
     this.marketData = await stockService.getMarketStatus();
-  },
+  }
 };
 </script>
 

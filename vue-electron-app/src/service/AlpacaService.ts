@@ -192,7 +192,7 @@ export default {
         "APCA-API-SECRET-KEY": configSecretKey
       }
     });
-    if(bars === undefined){
+    if (bars === undefined) {
       return;
     }
     const resp = {
@@ -266,7 +266,7 @@ export default {
   /**
    * Get market status.
    */
-  getMarketStatus(){
-    return alpaca.getClock()
+  getMarketStatus() {
+    return alpaca.getClock();
   }
 };

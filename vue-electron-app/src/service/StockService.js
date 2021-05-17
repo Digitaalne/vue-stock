@@ -102,7 +102,7 @@ export default {
    * Get market status. Opened or not
    * @returns information about market
    */
-  getMarketStatus(){
+  getMarketStatus() {
     const activeService = confService.getActiveService();
     if (activeService === "ALPACA") {
       return alpacaService.getMarketStatus();
